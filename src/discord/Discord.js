@@ -39,20 +39,11 @@ module.exports = class Discord {
     }
 
     ProcessEvent(eventData, user, type){
-        let command = this.FindCommand(type, eventData);
-        let params = "";
-        if(type === "MESSAGE"){
-            params = this.GetParamsFromMessage(eventData)
-        }
-        if(type === "REACTIONADD" || type === "REACTIONREMOVE"){
-            params = this.GetParamsFromReaction(eventData, type);
-        }
-
-        let commandObj = new(require('./commands/' + command))(this); //Create a new CommandObject with the Client inserted. 
+        let command = this.FindAndProcessCommand(type, eventData, user);       
     }
 
     //Based on the command we need to do different things
-    FindCommand(type, eventData){
+    FindAndProcessCommand(type, eventData, user){
         let command = "";
         let serverStorage = this.GetServerStorage(eventData);
         switch (type) {
@@ -62,6 +53,7 @@ module.exports = class Discord {
             }
 
             case "REACTIONREMOVE":{
+                params = this.GetParamsFromReaction(eventData, type);
                 command += "ReactionRemove";
                 break;
             }  
@@ -69,8 +61,13 @@ module.exports = class Discord {
             case "MESSAGE":{
                 //Handle Messages
                 let content = eventData.content;
-                command += this.GetCommandFromMessageContent(content, serverStorage).then();
-                // umbauen Sodass das Promise direkt den Command Später auslöst
+                this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
+                    let params = this.GetParamsFromMessage(eventData)
+                    let commandClass = new(require('./commands/' + commandObj.filePath))(this, eventData, user); //Create a new CommandObject with the Client inserted.
+                    commandClass.execute();
+                }).catch(errorStr => {
+                    console.log(errorStr);
+                });
             }
 
             default:{
@@ -123,7 +120,7 @@ module.exports = class Discord {
             let database = low(new FileSync(storageFile));
             //Create the BASE structure
             database.defaults({commands: [], owner : guild.ownerID, forcedStart : '/'}).write();
-            database.get('commands').push({name : '/kick', filePath : 'kickUser'}).write();
+            database.get('commands').push({name : '/kick', filePath : 'kickUser.js'}).write();
             return database;
         }
 
