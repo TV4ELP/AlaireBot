@@ -34,7 +34,7 @@ module.exports = class Discord {
             //IF a message added shouldn't be cached for any weird reason.
             //Just gets rid of potential errors down the line
             if(message.partial) await message.fetch();
-            this.ProcessEvent(message, user, 'MESSAGE');
+            this.ProcessEvent(message, message.author, 'MESSAGE');
         });
     }
 
@@ -63,7 +63,7 @@ module.exports = class Discord {
                 let content = eventData.content;
                 this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
                     let params = this.GetParamsFromMessage(eventData)
-                    let commandClass = new(require('./commands/' + commandObj.filePath))(this, eventData, user); //Create a new CommandObject with the Client inserted.
+                    let commandClass = new(require('./commands/' + commandObj.filePath))(this, eventData, user, serverStorage); //Create a new CommandObject with the Client inserted.
                     commandClass.execute();
                 }).catch(errorStr => {
                     console.log(errorStr);
@@ -84,6 +84,7 @@ module.exports = class Discord {
     }
 
     //Returns a Promise with the command or Error
+    //TODO check for forcedstart
     GetCommandFromMessageContent(contentString, serverStorage){
         let commandPromise = new Promise((resolve, reject) => {
             let contenStringUP = contentString.toUpperCase();
@@ -119,8 +120,24 @@ module.exports = class Discord {
             fs.mkdirSync(storagePath);
             let database = low(new FileSync(storageFile));
             //Create the BASE structure
+            //forcedStart, with what charakter the bot executes basic commands
             database.defaults({commands: [], owner : guild.ownerID, forcedStart : '/'}).write();
-            database.get('commands').push({name : '/kick', filePath : 'kickUser.js'}).write();
+            database.get('commands').push({name : '/kick', filePath : 'kickUser.js', forcedStart : true}).write();
+
+            let roleManager = guild.roles;
+            let roles = roleManager.cache;
+            let role = roles.find(role => role.name == "Muted");
+            if(role == null){
+                roleManager.create({
+                    data: {
+                        name: 'Muted',
+                        color: 'BLUE',
+                    },
+                    reason: 'Bot initialisation for role',
+                }).then(newRole => {
+                    database.set('muterole', newRole.id).write();
+                });
+            }
             return database;
         }
 
