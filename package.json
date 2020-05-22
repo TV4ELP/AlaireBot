@@ -1,0 +1,27 @@
+{
+  "name": "botv2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "bufferutil": "^4.0.1",
+    "discord.js": "^12.1.1",
+    "express": "^4.17.1",
+    "lowdb": "^1.0.0",
+    "utf-8-validate": "^5.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TV4ELP/AlaireBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TV4ELP/AlaireBot/issues"
+  },
+  "homepage": "https://github.com/TV4ELP/AlaireBot#readme"
+}

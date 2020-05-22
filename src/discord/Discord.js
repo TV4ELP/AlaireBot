@@ -114,6 +114,7 @@ module.exports = class Discord {
         let guildId = guild.id;
         let storagePath = 'storage/' + guildId + '/';
         let storageFile = storagePath + 'config.json';
+        let mutedDatabaseFilePath = storagePath + 'muted.json';
 
         //If no Databse exists we need to create it.
         if(fs.existsSync(storagePath) == false){
@@ -121,7 +122,7 @@ module.exports = class Discord {
             let database = low(new FileSync(storageFile));
             //Create the BASE structure
             //forcedStart, with what charakter the bot executes basic commands
-            database.defaults({commands: [], owner : guild.ownerID, forcedStart : '/'}).write();
+            database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
             database.get('commands').push({name : '/kick', filePath : 'kickUser.js', forcedStart : true}).write();
 
             let roleManager = guild.roles;
@@ -137,7 +138,16 @@ module.exports = class Discord {
                 }).then(newRole => {
                     database.set('muterole', newRole.id).write();
                 });
+            }else{
+                database.set('muterole', role.id).write();
             }
+            
+            //Database for all Muted Member.
+            //currentlymuted = memberId => {timestamp, timeinseconds}
+            //mutedCount = memberID => int
+            let mutedDatabse = low(new FileSync(mutedDatabaseFilePath));
+            mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
+            database.set('muteDatabsePath', mutedDatabaseFilePath).write();
             return database;
         }
 
