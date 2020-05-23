@@ -1,3 +1,6 @@
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
+
 module.exports = class BasicCommand {
     constructor(discord, eventData, user, database){
         this.client = discord.client;
@@ -30,6 +33,12 @@ module.exports = class BasicCommand {
     muteRoleId(){
         let muteRole = this.database.get('muterole').value();
         return muteRole;
+    }
+
+    muteDatabase(){
+        let muteDatabsePath = this.database.get('muteDatabsePath').value();
+        let mutedDatabase = low(new FileSync(muteDatabsePath));
+        return mutedDatabase;
     }
 
 }
