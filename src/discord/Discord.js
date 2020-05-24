@@ -8,6 +8,12 @@ module.exports = class Discord {
         this.mainDB = db;
         this.client = new DiscordJS.Client({partials : ['MESSAGE', 'CHANNEL', 'REACTION']});
         this.RegisterEvents();
+        this.StartWatcher();
+    }
+
+    StartWatcher(){
+        let watcher = new(require('./watcher/kickWatcher.js'))(this.client);
+        watcher.watch();
     }
 
     Start(){
@@ -62,8 +68,8 @@ module.exports = class Discord {
                 //Handle Messages
                 let content = eventData.content;
                 this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
-                    let params = this.GetParamsFromMessage(eventData)
-                    let commandClass = new(require('./commands/' + commandObj.filePath))(this, eventData, user, serverStorage); //Create a new CommandObject with the Client inserted.
+                    let params = this.GetParamsFromMessage(eventData, commandObj)
+                    let commandClass = new(require('./commands/' + commandObj.filePath))(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
                     commandClass.execute();
                 }).catch(errorStr => {
                     console.log(errorStr);
@@ -78,9 +84,17 @@ module.exports = class Discord {
         return command += ".js";
     }
 
-
-    GetParamsFromMessage(message){
-
+    //Get all parameter from a message
+    GetParamsFromMessage(message, commandObj){
+        //first lets remove the command from the content
+        let content = message.content;
+        content = content.replace(commandObj.name,'');
+        //we already handel mentions in the basicCommand, so out with those too
+        content = content.replace(/<@.*?>/g, '').trim();
+        //Now we have the mostly clean message (hopefully)
+        //Arguments (for now) are space separated
+        let args = content.match(/[^\s"]+|"([^"]*)"/ig);
+        return args;
     }
 
     //Returns a Promise with the command or Error

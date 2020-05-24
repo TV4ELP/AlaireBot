@@ -2,11 +2,12 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
 module.exports = class BasicCommand {
-    constructor(discord, eventData, user, database){
+    constructor(discord, eventData, user, database, params){
         this.client = discord.client;
         this.event = eventData;
         this.user = user;
         this.database = database;
+        this.params = params;
     }
 
     execute(){
