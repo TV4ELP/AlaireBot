@@ -13,3 +13,4 @@ Aua
     - ~~Check if Timestamp + duration is < now~~
         - ~~If it is, unmute i.e. remove role~~
         - If it is, then write into a Botchannel
+- Get and set server port in main,json

@@ -42,4 +42,16 @@ module.exports = class BasicCommand {
         return mutedDatabase;
     }
 
+    isAdmin(user){
+        let adminUser = this.database.get('owner').value();
+        if(user.id == adminUser){
+            return true;
+        }
+        return false;
+    }
+
+    getGuildFromMessage(){
+        return this.event.guild;
+    }
+
 }

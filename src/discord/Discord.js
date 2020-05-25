@@ -121,6 +121,11 @@ module.exports = class Discord {
     //Create if not Found
     GetServerStorage(event){
         let guild = event.guild;
+
+        //no guild, no doing stuff
+        if(guild == null){
+            return null;
+        }
         if(guild.available == false){
             return null;
         }
