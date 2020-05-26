@@ -8,6 +8,7 @@ module.exports = class BasicCommand {
         this.user = user;
         this.database = database;
         this.params = params;
+        this.permissions = [];
     }
 
     execute(){
@@ -52,6 +53,10 @@ module.exports = class BasicCommand {
 
     getGuildFromMessage(){
         return this.event.guild;
+    }
+
+    isCommandAllowed(){
+        let executingMember = this.user;
     }
 
 }

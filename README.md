@@ -14,3 +14,4 @@ Aua
         - ~~If it is, unmute i.e. remove role~~
         - If it is, then write into a Botchannel
 - Get and set server port in main,json
+- Default Setup Vars in each command to setup them all at once for a new Server

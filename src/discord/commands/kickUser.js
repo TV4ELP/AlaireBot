@@ -6,13 +6,20 @@ module.exports = class KickUser extends BasicCommand{
         super(discord, eventData, user, database, params); //call parent
         this.duration = this.getTimeFromParams();
         this.reason = this.getReasonFromParams();
+        this.permissions = [
+            "mute"
+        ];
     }
  
     execute(){
         let mentions = this.getMentions();
         if(this.muteRoleId() == null){
-            this.event.reply("There is no Role defined");
+            this.event.channel.send("There is no Role defined");
             return;
+        }
+
+        if(this.isCommandAllowed() == false){
+            return;//Maybe Log and kill later if he does it too much
         }
 
         mentions.each(user => {
