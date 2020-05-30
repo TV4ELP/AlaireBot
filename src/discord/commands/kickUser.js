@@ -1,14 +1,21 @@
-const BasicCommand = require('./basicCommand.js');
+const BasicCommand = require('./basicCommand.js').classObj;
 
-module.exports = class KickUser extends BasicCommand{
+const defaults = {
+    command : "/kick",
+    filePath : "kickUser.js",
+    forcedStart : true,
+    enabled : true,
+    permissions : [
+        "mute",
+    ]
+};
+module.exports.defaults = defaults;
+module.exports.classObj = class KickUser extends BasicCommand{
 
     constructor(discord, eventData, user, database, params){
         super(discord, eventData, user, database, params); //call parent
         this.duration = this.getTimeFromParams();
         this.reason = this.getReasonFromParams();
-        this.permissions = [
-            "mute"
-        ];
     }
  
     execute(){
@@ -60,7 +67,7 @@ module.exports = class KickUser extends BasicCommand{
 
         //In any case, update the count
         let counter = muteCount.find({ id : guildMember.id});
-        if(counter == null){
+        if(counter.value() == null){
             let countObj = {
                 id : guildMember.id,
                 count : 1,
