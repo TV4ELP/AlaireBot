@@ -1,6 +1,15 @@
-const BasicCommand = require('./basicCommand.js');
-
-module.exports = class webLogin extends BasicCommand{
+const BasicCommand = require('./basicCommand.js').classObj;
+const defaults = {
+    command : "/login",
+    filePath : "webLogin.js",
+    forcedStart : true,
+    enabled : false,
+    permissions : [
+        "admin"
+    ]
+};
+module.exports.defaults = defaults;
+module.exports.classObj = class webLogin extends BasicCommand{
 
     constructor(discord, eventData, user, database, params){
         super(discord, eventData, user, database, params); //call parent

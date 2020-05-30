@@ -1,7 +1,16 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
-module.exports = class BasicCommand {
+//Defaults get loadded into the Databse on first run. Currently can't be edited from outside the code
+const defaults = {
+    command : "",
+    filePath : "",
+    forcedStart : true,
+    enabled : false,
+    permissions : []
+};
+module.exports.defaults  = defaults;
+module.exports.classObj = class BasicCommand {
     constructor(discord, eventData, user, database, params){
         this.client = discord.client;
         this.event = eventData;

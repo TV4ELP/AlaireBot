@@ -69,7 +69,7 @@ module.exports = class Discord {
                 let content = eventData.content;
                 this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
                     let params = this.GetParamsFromMessage(eventData, commandObj)
-                    let commandClass = new(require('./commands/' + commandObj.filePath))(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
+                    let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
                     commandClass.execute();
                 }).catch(errorStr => {
                     console.log(errorStr);
@@ -104,8 +104,9 @@ module.exports = class Discord {
             let contenStringUP = contentString.toUpperCase();
             let commands = serverStorage.get('commands').value();
             for(let i in commands){
-                let name = commands[i].name.toUpperCase();
-                if(contenStringUP.includes(name)){
+                let name = commands[i].command.toUpperCase();
+                let enabled = commands[i].enabled;
+                if(contenStringUP.includes(name) && enabled){
                     resolve(commands[i]);
                 }
             }
@@ -142,8 +143,12 @@ module.exports = class Discord {
             //Create the BASE structure
             //forcedStart, with what charakter the bot executes basic commands
             database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
-            database.get('commands').push({name : '/kick', filePath : 'kickUser.js', forcedStart : true}).write();
-
+            
+            //get all commands and fill in
+            let commands = this.GetAllCommands();
+            commands.forEach(value =>{
+                database.get('commands').push(value.defaults).write();
+            });
             let roleManager = guild.roles;
             let roles = roleManager.cache;
             let role = roles.find(role => role.name == "Muted");
@@ -171,6 +176,19 @@ module.exports = class Discord {
         }
 
         return low(new FileSync(storageFile));
+    }
+
+    //All default values like name and path
+    // defauls / class
+    GetAllCommands(){
+        let defaults = [];
+        let path = 'src/discord/';
+        let dirContent = fs.readdirSync(path + 'commands');
+        dirContent.forEach((value, key) => {
+            let obj = require('./commands/' + value);
+            defaults.push(obj);
+        });
+        return defaults;
     }
 
     GetParamsFromReaction(reaction, type){
