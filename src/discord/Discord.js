@@ -42,6 +42,12 @@ module.exports = class Discord {
             if(message.partial) await message.fetch();
             this.ProcessEvent(message, message.author, 'MESSAGE');
         });
+
+        //Guild join is never partial
+        this.client.on('guildCreate', async(guild) => {
+            this.CreateDefaults(guild);
+        });
+
     }
 
     ProcessEvent(eventData, user, type){
@@ -82,6 +88,46 @@ module.exports = class Discord {
             }
         }
         return command += ".js";
+    }
+
+    CreateDefaults(guild){
+        let object = {guild : guild};
+        let database = this.GetServerStorage(object);
+
+        let guildId = guild.id;
+        let storagePath = 'storage/' + guildId + '/';
+        let mutedDatabaseFilePath = storagePath + 'muted.json';
+        
+
+        //get all commands and fill in
+        let commands = this.GetAllCommands();
+        commands.forEach(value =>{
+            database.get('commands').push(value.defaults).write();
+        });
+        let roleManager = guild.roles;
+        let roles = roleManager.cache;
+        let role = roles.find(role => role.name == "Muted");
+        if(role == null){
+            roleManager.create({
+                data: {
+                    name: 'Muted',
+                    color: 'BLUE',
+                },
+                reason: 'Bot initialisation for role',
+            }).then(newRole => {
+                database.set('muterole', newRole.id).write();
+            });
+        }else{
+            database.set('muterole', role.id).write();
+        }
+        
+        //Database for all Muted Member.
+        //currentlymuted = memberId => {timestamp, timeinseconds}
+        //mutedCount = memberID => int
+        let mutedDatabse = low(new FileSync(mutedDatabaseFilePath));
+        mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
+        database.set('muteDatabsePath', mutedDatabaseFilePath).write();
+        //Now we can even do extra stuffff? 
     }
 
     //Get all parameter from a message
@@ -134,7 +180,6 @@ module.exports = class Discord {
         let guildId = guild.id;
         let storagePath = 'storage/' + guildId + '/';
         let storageFile = storagePath + 'config.json';
-        let mutedDatabaseFilePath = storagePath + 'muted.json';
 
         //If no Databse exists we need to create it.
         if(fs.existsSync(storagePath) == false){
@@ -143,35 +188,6 @@ module.exports = class Discord {
             //Create the BASE structure
             //forcedStart, with what charakter the bot executes basic commands
             database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
-            
-            //get all commands and fill in
-            let commands = this.GetAllCommands();
-            commands.forEach(value =>{
-                database.get('commands').push(value.defaults).write();
-            });
-            let roleManager = guild.roles;
-            let roles = roleManager.cache;
-            let role = roles.find(role => role.name == "Muted");
-            if(role == null){
-                roleManager.create({
-                    data: {
-                        name: 'Muted',
-                        color: 'BLUE',
-                    },
-                    reason: 'Bot initialisation for role',
-                }).then(newRole => {
-                    database.set('muterole', newRole.id).write();
-                });
-            }else{
-                database.set('muterole', role.id).write();
-            }
-            
-            //Database for all Muted Member.
-            //currentlymuted = memberId => {timestamp, timeinseconds}
-            //mutedCount = memberID => int
-            let mutedDatabse = low(new FileSync(mutedDatabaseFilePath));
-            mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
-            database.set('muteDatabsePath', mutedDatabaseFilePath).write();
             return database;
         }
 
