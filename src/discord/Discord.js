@@ -127,7 +127,10 @@ module.exports = class Discord {
         let mutedDatabse = low(new FileSync(mutedDatabaseFilePath));
         mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
         database.set('muteDatabsePath', mutedDatabaseFilePath).write();
-        //Now we can even do extra stuffff? 
+        
+        //We need to add it manually here, because only all available guild at the start are watched, not new ones
+        let watcher = new(require('./watcher/kickWatcher.js'))(this.client);
+        watcher.watchSingleGuild(guildId);
     }
 
     //Get all parameter from a message

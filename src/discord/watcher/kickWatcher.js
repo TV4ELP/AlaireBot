@@ -6,6 +6,7 @@ module.exports = class kickWatcher {
     constructor(discord){
         this.interval = 10 * 1000; //10 seconds
         this.client = discord;
+        this.storagePath = 'storage/';
     }
  
     watch(){
@@ -13,15 +14,18 @@ module.exports = class kickWatcher {
     }
 
     watchAllDatabses(){
-        let storagePath = 'storage/';
-        let dirs = fs.readdirSync(storagePath);
+        let dirs = fs.readdirSync(this.storagePath);
         for(let i = 0; dirs.length > i; i++){
             let dir = dirs[i];
             if(!isNaN(dir)){
                 
-                setInterval(this.watchInternal.bind(null, dir, storagePath, this.client), this.interval); //null because i dunno anymore
+                setInterval(this.watchInternal.bind(null, dir, this.storagePath, this.client), this.interval); //null because i dunno anymore
             }
         }
+    }
+
+    watchSingleGuild(guildID){
+        setInterval(this.watchInternal.bind(null, guildID, this.storagePath, this.client), this.interval); //null because i dunno anymore
     }
 
     watchInternal(db, storagePath, client){
