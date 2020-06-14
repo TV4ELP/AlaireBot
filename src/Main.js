@@ -7,7 +7,7 @@ const Discord = require('./discord/Discord.js');
 module.exports = class Main {
    constructor(){
       //Setup if it is the first Start
-      this.mainDB = (fs.existsSync('.firstStart') == false ? this.Setup() : low(new FileSync('storage/main.json')) );
+      this.mainDB = (fs.existsSync('.firstStart') == false ? this.Setup() : this.AfterStart() );
 
       this.expressServer = this.GetServer();
       this.discord = this.GetDiscord();
@@ -20,6 +20,13 @@ module.exports = class Main {
    
       console.log('CREATED INITIAL CONFIG => SHUTTING DOWN');
       process.exit(1);
+   }
+
+
+   AfterStart(){
+      let db = low(new FileSync('storage/main.json'));
+      database.set('storagePath', 'storage/').write();     
+      return db;
    }
 
    GetServer(){
