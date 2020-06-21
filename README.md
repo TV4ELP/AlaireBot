@@ -4,6 +4,13 @@ a nicer way.
 
 Below are some todo's. Feel free to step in and just add to the bot. 
 
+# Using the Bot
+- Pull the code
+- npm install
+- place a "discord.key" file in the Project root. Containing your Discord developer Key in Plaintext
+- On First Run the Required Files/Folders are created.
+- Restart and have fun
+
 # Contribution
 Sure, go into src/discord/commands and look how the structure is build and extend the functionality like you need it
 
