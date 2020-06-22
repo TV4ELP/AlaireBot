@@ -25,7 +25,7 @@ module.exports = class Main {
 
    AfterStart(){
       let db = low(new FileSync('storage/main.json'));
-      database.set('storagePath', 'storage/').write();     
+      db.set('storagePath', 'storage/').write();     
       return db;
    }
 
