@@ -74,6 +74,9 @@ module.exports = class Discord {
          case "MESSAGE":{
                //Handle Messages
                let content = eventData.content;
+               if(eventData.author.bot){
+                  break; //Just die here, no need to do shit when you are a bot
+               }
                this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
                   let params = this.GetParamsFromMessage(eventData, commandObj)
                   let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
