@@ -7,12 +7,13 @@ module.exports = class permissionHelper {
       this.discordClient = discordClient;
       this.guildId = guildId
       this.mainDB = mainDB;
+      this.guildDB = low(new FileSync(this.getStoragePath() + guildId + '/config.json'));
       this.storagePath = this.getStoragePath();
    }
 
    setupPermissionDBForGuild(){
       //First get all available permission from commands
-      let availablePermissions = this.database.get('commands').map('permissions')
+      let availablePermissions = this.guildDB.get('commands').map('permissions')
          .flatten() //make flat list
          .uniq() //remove duplicates
          .value(); //and then get the actual array to work on
@@ -20,7 +21,7 @@ module.exports = class permissionHelper {
          availablePermissions = []; //Fallback so the following code doesn't yeet itself
       }
 
-      let storageFile = this.storagePath + this.guildId + 'permissions.json';
+      let storageFile = this.storagePath + this.guildId + '/permissions.json';
       //create the DB
       let database = low(new FileSync(storageFile));
       database.defaults({availablePermissions : [], users : {}, roles : []}).write(); //User but also roles can have their own permissions
@@ -28,16 +29,14 @@ module.exports = class permissionHelper {
       //All Permission into the DB please
       let availablePermissionsInDB = database.get('availablePermissions');
       availablePermissions.forEach(element => {
-         availablePermissionsInDB.push(element);
+         availablePermissionsInDB.push(element).write();
       });
-      availablePermissionsInDB.write();
       
-      let guildConfig = low(new FileSync(this.storagePath + this.guildId + 'config.json'));
-      guildConfig.set('permissionDatabasePath', storageFile); 
+      this.guildDB.set('permissionDatabasePath', storageFile).write(); 
    }
 
    getStoragePath(){
-      return this.mainDB.get('storagePath').value;
+      return this.mainDB.get('storagePath').value();
    }
 
 
@@ -51,7 +50,7 @@ module.exports = class permissionHelper {
 
    isCommandAllowed(commandPermissionArray, user){
       
-      array.forEach(permissionName => {
+      commandPermissionArray.forEach(permissionName => {
          if(this.roleHasPermissions(permissionName, user) == false){ //if the role doesn't have the permission, maybe the user does
             if(this.userHasPermission(permissionName, user) == false){ //likewise, the individual user permission overwrite everything
                return false;
@@ -63,9 +62,29 @@ module.exports = class permissionHelper {
       
    }
 
+   getAllPermissions(){
+      let db = this.getPermissionDB();
+      let permissionArray = db.get('availablePermissions').value();
+      return permissionArray;
+   }
+
    
    getPermissionDB(){
-      let guildConfig = low(new FileSync(this.storagePath + this.guildId + 'config.json'));
-      return low(new FileSync(guildConfig.get('permissionDatabasePath').value()));
+      let guildConfig = low(new FileSync(this.storagePath + this.guildId + '/config.json'));
+      let path = guildConfig.get('permissionDatabasePath').value();
+      return low(new FileSync(path));
+   }
+
+   getPermissionFromParams(paramsArray){
+      let newParams = [];
+      let availablePermissions = this.getAllPermissions();
+
+      paramsArray.forEach(element => {
+         if(availablePermissions.includes(element)){
+            newParams.push(element);
+         }
+      });
+
+      return newParams;
    }
 }

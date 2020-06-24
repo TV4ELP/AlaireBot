@@ -2,7 +2,7 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const DiscordJS = require('discord.js');
 const fs = require('fs');
-const permHelper = require('./permissionHelper')
+const permissionHelper = require('./permissionHelper')
 
 module.exports = class Discord {
    constructor(db){
@@ -136,8 +136,8 @@ module.exports = class Discord {
       let watcher = new(require('./watcher/kickWatcher.js'))(this.client);
       watcher.watchSingleGuild(guildId);
 
-      let permissionHelper = new permissionHelper(this.client, guildId, this.mainDB);
-      permissionHelper.setupPermissionDBForGuild();
+      let permissionHelperObj = new permissionHelper(this.client, guildId, this.mainDB);
+      permissionHelperObj.setupPermissionDBForGuild();
    }
 
    //Get all parameter from a message

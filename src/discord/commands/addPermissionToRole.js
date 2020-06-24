@@ -1,4 +1,6 @@
 const BasicCommand = require('./basicCommand.js').classObj;
+
+
 const defaults = {
    command : "/addPermToGroup",
    filePath : "addPermissionToRole.js",
@@ -18,14 +20,20 @@ module.exports.classObj = class addPermissionToRole extends BasicCommand{
    }
  
    execute(){
-      this.getAllPermissions();
+      //no doing shit if we aren't even allowed to
+      if(this.isCommandAllowed(defaults.permissions) == false){
+         //TODO DO SMTH 
+         return false;
+      }
+
+      let permissionHelper = this.getPermissionHelper();
+      let permissions = permissionHelper.getPermissionFromParams(this.params);
+      let user = this.getMentions();
+
+      mentions.each(user => {
+         
+      });
    }
 
-   getAllPermissions(){
-      let availablePermissions = this.database.get('commands').map('permissions').flatten().uniq().value();
-      if(availablePermissions == null){
-         availablePermissions = []; //Fallback so the following code doesn't yeet itself
-      }
-      return availablePermissions;
-   }
+
 }

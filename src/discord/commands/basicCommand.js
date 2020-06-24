@@ -1,5 +1,6 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
+const permissionHelper = require('../permissionHelper');
 
 //Defaults get loadded into the Databse on first run. Currently can't be edited from outside the code
 const defaults = {
@@ -9,6 +10,7 @@ const defaults = {
    enabled : false,
    permissions : []
 };
+
 module.exports.defaults  = defaults;
 module.exports.classObj = class BasicCommand {
    constructor(discord, eventData, user, database, params){
@@ -18,6 +20,7 @@ module.exports.classObj = class BasicCommand {
       this.database = database;
       this.params = params;
       this.permissions = [];
+      this.mainDB = discord.mainDB;
    }
 
    execute(){
@@ -64,8 +67,15 @@ module.exports.classObj = class BasicCommand {
       return this.event.guild;
    }
 
-   isCommandAllowed(){
-      let executingMember = this.user;
+   isCommandAllowed(permissions){
+      const permissionsHelper = this.getPermissionHelper();
+      let allowed = permissionsHelper.isCommandAllowed(permissions, this.user);
+      return allowed;
+   }
+
+   getPermissionHelper(){
+      const permissionHelperObj = new permissionHelper(this.client, this.getGuildFromMessage().id, this.mainDB);
+      return permissionHelperObj;
    }
 
 }
