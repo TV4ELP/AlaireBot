@@ -24,7 +24,7 @@ module.exports = class permissionHelper {
       let storageFile = this.storagePath + this.guildId + '/permissions.json';
       //create the DB
       let database = low(new FileSync(storageFile));
-      database.defaults({availablePermissions : [], users : {}, roles : []}).write(); //User but also roles can have their own permissions
+      database.defaults({availablePermissions : [], users : {}, roles : {}}).write(); //User but also roles can have their own permissions
 
       //All Permission into the DB please
       let availablePermissionsInDB = database.get('availablePermissions');
@@ -40,26 +40,115 @@ module.exports = class permissionHelper {
    }
 
 
-   roleHasPermissions(){
-      //return true/false
-   }
-
-   userHasPermission(){
-      //return true/false
-   }
-
-   isCommandAllowed(commandPermissionArray, user){
-      
-      commandPermissionArray.forEach(permissionName => {
-         if(this.roleHasPermissions(permissionName, user) == false){ //if the role doesn't have the permission, maybe the user does
-            if(this.userHasPermission(permissionName, user) == false){ //likewise, the individual user permission overwrite everything
-               return false;
+   userHasRolePermissions(permissionNameString, user){
+      let roles = user.roles.cache;
+      let permissionDb = this.getPermissionDB();
+      let hasPermission = false;
+      roles.each(role => {
+         let dbRole = permissionDb.get('roles').get(role.id).value();
+         if(dbRole){
+            let hasPermissionInner = this.userHasRolePermissionsInner(permissionNameString, dbRole);
+            if(hasPermission == false){
+               hasPermission = hasPermissionInner; //Only set it when it is false, this way we can't invalidate given permissions again with another role
             }
          }
       });
-      //either the user ot the group had all the permission allowed, so we cool here
-      return true;
+      return hasPermission;
+   }
+
+   userHasRolePermissionsInner(permissionNameString, dbRoleValue){
+      if(dbRoleValue.permissions.includes(permissionNameString)){
+         return true;
+      }
+      return false;
+   }
+
+   roleHasPermission(permissionNameString, role){
+      let permissionDb = this.getPermissionDB();
+      let dbRole = permissionDb.get('roles').get(role.id).value();
+      if(dbRole){
+         if(dbRole.permissions.includes(permissionNameString)){
+            return true;
+         }
+      }
+      return false;
+   }
+
+   userHasPermission(permissionNameString, user){
+      let permissionDb = this.getPermissionDB();
+      let dbUser = permissionDb.get('users').get(user.id).value();
+      if(dbUser){
+         if(dbUser.permissions.includes(permissionNameString)){
+            return true;
+         }
+      }
+      return false;
+   }
+
+   userGivePermission(permissionString, user){
+      let permissionDb = this.getPermissionDB();
+      let dbUser = permissionDb.get('users').get(user.id);
+      let userValue = dbUser.value();
+      if(userValue == null){
+         permissionDb.get('users').set(user.id, {permissions: []}).write();
+         return this.userGivePermission(permissionString, user);
+      }
+      if(userValue){
+         if(userValue.permissions.includes(permissionString) == false){
+            dbUser.get('permissions').push(permissionString).write();
+            return true;
+         }else{
+            return false
+         }
+      }
       
+      throw("Sorry, but i couldn't find that user :c => " + user.displayName);
+   }
+
+   roleGivePermission(permissionString, role){
+      let permissionDb = this.getPermissionDB();
+      let dbRole = permissionDb.get('roles').get(role.id)
+      let dbRoleValue = dbRole.value();
+      if(dbRoleValue == null){
+         permissionDb.get('roles').set(role.id, {permissions: []}).write();
+         return this.roleGivePermission(permissionString, role);
+      }
+      if(dbRoleValue){
+         if(dbRoleValue.permissions.includes(permissionString) == false){
+            dbRole.get('permissions').push(permissionString).write();
+            return true;
+         }else{
+            return false;
+         }
+      }
+      let exceptionObj = {
+         message: "Sorry, but i couldn't find that role :c => " + role.name
+      }
+      throw(exceptionObj);
+   }
+
+   isCommandAllowed(commandPermissionArray, user){
+      let returnVal = true; //by default you can do everything
+      commandPermissionArray.forEach(permissionName => {
+        if(this.isPermissionAllowed(permissionName, user) == false){
+            returnVal = false; //Some permission was not availabel, sorry mate
+        }
+      });
+      //either the user or the group had all the permission allowed, so we cool here
+      return returnVal;
+   }
+
+   isPermissionAllowed(permissionNameString, user){
+      if(this.isAdmin(user)){
+         return true;
+      }
+
+      if(this.userHasRolePermissions(permissionNameString, user) == false){ //if the role doesn't have the permission, maybe the user does
+         if(this.userHasPermission(permissionNameString, user) == false){ //likewise, the individual user permission overwrite everything
+            return false;
+         }
+      }
+      return true;
    }
 
    getAllPermissions(){
@@ -86,5 +175,13 @@ module.exports = class permissionHelper {
       });
 
       return newParams;
+   }
+
+   isAdmin(user){
+      let adminUser = this.guildDB.get('owner').value();
+      if(user.id == adminUser){
+         return true;
+      }
+      return false;
    }
 }

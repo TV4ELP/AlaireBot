@@ -2,7 +2,7 @@ const BasicCommand = require('./basicCommand.js').classObj;
 
 
 const defaults = {
-   command : "/addPermToGroup",
+   command : "/addPermission",
    filePath : "addPermissionToRole.js",
    forcedStart : true,
    enabled : true,
@@ -22,17 +22,36 @@ module.exports.classObj = class addPermissionToRole extends BasicCommand{
    execute(){
       //no doing shit if we aren't even allowed to
       if(this.isCommandAllowed(defaults.permissions) == false){
-         //TODO DO SMTH 
+         this.event.channel.send('You dont have the Permissions needed')
          return false;
       }
 
       let permissionHelper = this.getPermissionHelper();
       let permissions = permissionHelper.getPermissionFromParams(this.params);
-      let user = this.getMentions();
+      let userMentions = this.getMentions();
+      let roleMentions = this.getMentionRoles();
 
-      mentions.each(user => {
-         
+      permissions.forEach(permissionString =>{
+         userMentions.each(user => {
+            if(permissionHelper.userHasPermission(permissionString, user) == false){
+               permissionHelper.userGivePermission(permissionString, user);
+               this.event.channel.send("User updated with permission: " + user.displayName);
+            }else{
+               this.event.channel.send("User already had that permission: " + user.displayName);
+            }
+         });
+   
+         roleMentions.each(role => {
+            if(permissionHelper.roleHasPermission(permissionString, role) == false){
+               permissionHelper.roleGivePermission(permissionString, role);
+               this.event.channel.send("Role updated with permission: " + role.name);
+            }else{
+               this.event.channel.send("Role already had that permission: " + role.name);
+            }
+         });
       });
+
+      
    }
 
 

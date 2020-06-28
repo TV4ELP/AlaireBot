@@ -82,13 +82,13 @@ module.exports = class Discord {
                   let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
                   commandClass.execute();
                }).catch(errorStr => {
-                  if(errorStr.includes('NOT FOUND')){
+                  if(errorStr.message.includes('NOT FOUND')){
 
                   }else{
                      eventData.reply("Uhmmm... i'm not feeling so well... i notified a doctor already");
                      let cache = this.client.users.cache;
                      cache.get('147011778637856768').createDM().then (dmChannel => {
-                        dmChannel.send("someMessage");
+                        dmChannel.send(errorStr.message);
                      });
                   }
                   console.log(errorStr);

@@ -23,6 +23,9 @@ Want to develope the online api/website? Look into src/server
 - Permissions
     - User wins always, if the user is denied, the role can't allow it
     - ~~Permission database~~
+    - ~~Set Permissions~~ 28.June.2020
+    - ~~Check for Permissions~~ 28.June.2020
+    - Remove PermissionCommand
 - Respond to certain commands only in a Bot Channel
     - Create and Save ID of Bot Channel in Config
 - ~~Watcher for Muted User creating~~

@@ -37,6 +37,11 @@ module.exports.classObj = class BasicCommand {
       return mentions.members;
    }
 
+   getMentionRoles(){
+      let mentions = this.event.mentions;
+      return mentions.roles;
+   }
+
    //check if a user has a role
    userHasRole(roleID, user){
       let roleManager = user.roles;
@@ -69,7 +74,7 @@ module.exports.classObj = class BasicCommand {
 
    isCommandAllowed(permissions){
       const permissionsHelper = this.getPermissionHelper();
-      let allowed = permissionsHelper.isCommandAllowed(permissions, this.user);
+      let allowed = permissionsHelper.isCommandAllowed(permissions, this.event.member);
       return allowed;
    }
 

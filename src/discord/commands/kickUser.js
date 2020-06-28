@@ -19,6 +19,12 @@ module.exports.classObj = class KickUser extends BasicCommand{
    }
 
    execute(){
+      //no doing shit if we aren't even allowed to
+      if(this.isCommandAllowed(defaults.permissions) == false){
+         this.event.channel.send('You dont have the Permissions needed')
+         return false;
+      }
+
       let mentions = this.getMentions();
       if(this.muteRoleId() == null){
          this.event.channel.send("There is no Role defined");
