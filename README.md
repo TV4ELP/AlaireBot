@@ -17,15 +17,21 @@ Sure, go into src/discord/commands and look how the structure is build and exten
 Want to develope the online api/website? Look into src/server
 
 # TODO
+- Add Roles Via Reactions
+    - Configure which roles can be added with what reaction
+    - Add reactions to Message
+    - Have a Database for all Messages that can add permission
+    - Add Permission when reacted
+    - Remove when reaction is rewoked
 - ~~Mute should add to the muted Database~~
 - Allow certain commands only in Bot Channels
 - Allow certain commands only by certain roles
 - Permissions
-    - User wins always, if the user is denied, the role can't allow it
+    - ~~User wins always, if the user is denied, the role can't allow it~~
     - ~~Permission database~~
     - ~~Set Permissions~~ 28.June.2020
     - ~~Check for Permissions~~ 28.June.2020
-    - Remove PermissionCommand
+    - ~~Remove PermissionCommand~~ 09.July.2020
 - Respond to certain commands only in a Bot Channel
     - Create and Save ID of Bot Channel in Config
 - ~~Watcher for Muted User creating~~
