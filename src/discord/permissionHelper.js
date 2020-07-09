@@ -92,8 +92,7 @@ module.exports = class permissionHelper {
       if(userValue == null){
          permissionDb.get('users').set(user.id, {permissions: []}).write();
          return this.userGivePermission(permissionString, user);
-      }
-      if(userValue){
+      }else{
          if(userValue.permissions.includes(permissionString) == false){
             dbUser.get('permissions').push(permissionString).write();
             return true;
@@ -101,9 +100,27 @@ module.exports = class permissionHelper {
             return false
          }
       }
-      
-      throw("Sorry, but i couldn't find that user :c => " + user.displayName);
    }
+
+   userDelPermission(permissionString, user){
+      let permissionDB = this.getPermissionDB();
+      let dbUser = permissionDB.get('users').get(user.id);
+      let userValue = dbUser.value();
+      if(userValue == null){
+         permissionDb.get('users').set(user.id, {permissions: []}).write();
+         return this.userDelPermission(permissionString, user);
+      }else{
+         if(userValue.permissions.includes(permissionString) == true){
+            dbUser.get('permissions').remove(item => {
+                  return item == permissionString;
+            }).write();
+            return true;
+         }else{
+            return false
+         }
+      }
+   }
+   
 
    roleGivePermission(permissionString, role){
       let permissionDb = this.getPermissionDB();
@@ -112,8 +129,7 @@ module.exports = class permissionHelper {
       if(dbRoleValue == null){
          permissionDb.get('roles').set(role.id, {permissions: []}).write();
          return this.roleGivePermission(permissionString, role);
-      }
-      if(dbRoleValue){
+      }else{
          if(dbRoleValue.permissions.includes(permissionString) == false){
             dbRole.get('permissions').push(permissionString).write();
             return true;
@@ -121,10 +137,25 @@ module.exports = class permissionHelper {
             return false;
          }
       }
-      let exceptionObj = {
-         message: "Sorry, but i couldn't find that role :c => " + role.name
+   }
+
+   roleDelPermission(permissionString, role){
+      let permissionDb = this.getPermissionDB();
+      let dbRole = permissionDb.get('roles').get(role.id)
+      let dbRoleValue = dbRole.value();
+      if(dbRoleValue == null){
+         permissionDb.get('roles').set(role.id, {permissions: []}).write();
+         return this.roleDelPermission(permissionString, role);
+      }else{
+         if(dbRoleValue.permissions.includes(permissionString) == true){
+            dbRole.get('permissions').remove(item => {
+               return item == permissionString;
+            }).write();
+            return true;
+         }else{
+            return false;
+         }
       }
-      throw(exceptionObj);
    }
 
    isCommandAllowed(commandPermissionArray, user){

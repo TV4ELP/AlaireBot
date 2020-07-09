@@ -56,7 +56,7 @@ module.exports = class Discord {
    }
 
    //Based on the command we need to do different things
-   FindAndProcessCommand(type, eventData, user){
+   FindAndProcessCommand(type, eventData, user, retry = false){
       let command = "";
       let serverStorage = this.GetServerStorage(eventData);
       switch (type) {
@@ -83,7 +83,17 @@ module.exports = class Discord {
                   commandClass.execute();
                }).catch(errorStr => {
                   if(errorStr.message.includes('NOT FOUND')){
-
+                     //lets try to get the command if it doesn't exist
+                     if(retry == false){
+                        let commands = this.GetAllCommands();
+                        commands.forEach(value =>{
+                           serverStorage.get('commands').remove({filePath: value.defaults.filePath}).write();
+                           serverStorage.get('commands').push(value.defaults).write();
+                        });
+                        this.FindAndProcessCommand(type, eventData, user, true);
+                     }else{
+                        eventData.reply("Me no knowing what dis means");
+                     }
                   }else{
                      eventData.reply("Uhmmm... i'm not feeling so well... i notified a doctor already");
                      let cache = this.client.users.cache;
@@ -176,7 +186,10 @@ module.exports = class Discord {
                }
          }
 
-         reject('COMMAND NOT FOUND:' + contentString);
+         let exceptionObj = {
+            message : 'COMMAND NOT FOUND:' + contentString
+         };
+         reject(exceptionObj);
 
       });
 
