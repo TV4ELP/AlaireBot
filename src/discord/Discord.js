@@ -81,27 +81,8 @@ module.exports = class Discord {
                   let params = this.GetParamsFromMessage(eventData, commandObj)
                   let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
                   commandClass.execute();
-               }).catch(errorStr => {
-                  if(errorStr.message.includes('NOT FOUND')){
-                     //lets try to get the command if it doesn't exist
-                     if(retry == false){
-                        let commands = this.GetAllCommands();
-                        commands.forEach(value =>{
-                           serverStorage.get('commands').remove({filePath: value.defaults.filePath}).write();
-                           serverStorage.get('commands').push(value.defaults).write();
-                        });
-                        this.FindAndProcessCommand(type, eventData, user, true);
-                     }else{
-                        eventData.reply("Me no knowing what dis means");
-                     }
-                  }else{
-                     eventData.reply("Uhmmm... i'm not feeling so well... i notified a doctor already");
-                     let cache = this.client.users.cache;
-                     cache.get('147011778637856768').createDM().then (dmChannel => {
-                        dmChannel.send(errorStr.message);
-                     });
-                  }
-                  console.log(errorStr);
+               }).catch(errorObj => {
+                  this.HandleProcessCommandError(errorObj, type, eventData, user, serverStorage);
                });
          }
 
@@ -113,6 +94,29 @@ module.exports = class Discord {
       return command += ".js";
    }
 
+   HandleProcessCommandError(errorObj, type, eventData, user, serverStorage){
+      if(errorObj.message.includes('NOT FOUND')){
+         //lets try to get the command if it doesn't exist
+         if(retry == false){
+            let commands = this.GetAllCommands();
+            commands.forEach(value =>{
+               serverStorage.get('commands').remove({filePath: value.defaults.filePath}).write();
+               serverStorage.get('commands').push(value.defaults).write();
+            });
+            this.FindAndProcessCommand(type, eventData, user, true);
+         }else{
+            eventData.reply("Me no knowing what dis means");
+         }
+      }else{
+         eventData.reply("Uhmmm... i'm not feeling so well... i notified a doctor already");
+         let cache = this.client.users.cache;
+         cache.get('147011778637856768').createDM().then(dmChannel => { //inform me please
+            dmChannel.send(errorStr.message);
+         });
+      }
+      console.log(errorStr);
+   }
+
    CreateDefaults(guild){
       let object = {guild : guild};
       let database = this.GetServerStorage(object);
@@ -120,6 +124,7 @@ module.exports = class Discord {
       let guildId = guild.id;
       let storagePath = 'storage/' + guildId + '/';
       let mutedDatabaseFilePath = storagePath + 'muted.json';
+      let reactionDatabaseFilePath = storagePath + 'reactions.json';
       
 
       //get all commands and fill in
@@ -149,11 +154,15 @@ module.exports = class Discord {
       //mutedCount = memberID => int
       let mutedDatabse = low(new FileSync(mutedDatabaseFilePath));
       mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
-      database.set('muteDatabsePath', mutedDatabaseFilePath).write();
+      database.set('muteDatabasePath', mutedDatabaseFilePath).write();
       
       //We need to add it manually here, because only all available guild at the start are watched, not new ones
       let watcher = new(require('./watcher/kickWatcher.js'))(this.client);
       watcher.watchSingleGuild(guildId);
+
+      let reactionDB = low(new FileSync(reactionDatabaseFilePath));
+      reactionDB.defaults({reaction : [], roleAndEmote : []}).write();
+      database.set('reactionDatabasePath', reactionDatabaseFilePath).write();
 
       let permissionHelperObj = new permissionHelper(this.client, guildId, this.mainDB);
       permissionHelperObj.setupPermissionDBForGuild();

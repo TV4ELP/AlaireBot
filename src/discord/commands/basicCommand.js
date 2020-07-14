@@ -55,8 +55,8 @@ module.exports.classObj = class BasicCommand {
    }
 
    muteDatabase(){
-      let muteDatabsePath = this.database.get('muteDatabsePath').value();
-      let mutedDatabase = low(new FileSync(muteDatabsePath));
+      let muteDatabasePath = this.database.get('muteDatabasePath').value();
+      let mutedDatabase = low(new FileSync(muteDatabasePath));
       return mutedDatabase;
    }
 
