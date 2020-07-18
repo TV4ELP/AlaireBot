@@ -82,7 +82,7 @@ module.exports = class Discord {
                   let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
                   commandClass.execute();
                }).catch(errorObj => {
-                  this.HandleProcessCommandError(errorObj, type, eventData, user, serverStorage);
+                  this.HandleProcessCommandError(errorObj, type, eventData, user, serverStorage, retry);
                });
          }
 
@@ -94,7 +94,7 @@ module.exports = class Discord {
       return command += ".js";
    }
 
-   HandleProcessCommandError(errorObj, type, eventData, user, serverStorage){
+   HandleProcessCommandError(errorObj, type, eventData, user, serverStorage, retry){
       if(errorObj.message.includes('NOT FOUND')){
          //lets try to get the command if it doesn't exist
          if(retry == false){

@@ -2,7 +2,7 @@ const BasicCommand = require('./basicCommand.js').classObj;
 
 
 const defaults = {
-   command : "/addRoleForReaction.js",
+   command : "/addRoleForReaction",
    filePath : "addRoleForReaction.js",
    forcedStart : true,
    enabled : true,
@@ -26,7 +26,7 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
          return false;
       }   
       
-      //TODO 
+      
    }
 
 
