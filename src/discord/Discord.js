@@ -111,10 +111,10 @@ module.exports = class Discord {
          eventData.reply("Uhmmm... i'm not feeling so well... i notified a doctor already");
          let cache = this.client.users.cache;
          cache.get('147011778637856768').createDM().then(dmChannel => { //inform me please
-            dmChannel.send(errorStr.message);
+            dmChannel.send(errorObj.stack);
          });
       }
-      console.log(errorStr);
+      console.log(errorObj.stack);
    }
 
    CreateDefaults(guild){

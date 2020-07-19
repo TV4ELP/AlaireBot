@@ -215,4 +215,11 @@ module.exports = class permissionHelper {
       }
       return false;
    }
+
+   getRoleById(roleID){
+      let guild = this.discordClient.guilds.resolve(this.guildId);
+      let roleManager = guild.roles;
+      let role = roleManager.resolve(roleID);
+      return role;
+   }
 }

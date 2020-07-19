@@ -1,6 +1,7 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const permissionHelper = require('../permissionHelper');
+const reactionHelper = require('../reactionHelper');
 
 //Defaults get loadded into the Databse on first run. Currently can't be edited from outside the code
 const defaults = {
@@ -60,6 +61,12 @@ module.exports.classObj = class BasicCommand {
       return mutedDatabase;
    }
 
+   reactionDatabase(){
+      let reactionDatabasePath = this.database.get('reactionDatabasePath').value();
+      let reactionDatabase = low(new FileSync(reactionDatabasePath));
+      return reactionDatabase;
+   }
+
    isAdmin(user){
       let adminUser = this.database.get('owner').value();
       if(user.id == adminUser){
@@ -81,6 +88,11 @@ module.exports.classObj = class BasicCommand {
    getPermissionHelper(){
       const permissionHelperObj = new permissionHelper(this.client, this.getGuildFromMessage().id, this.mainDB);
       return permissionHelperObj;
+   }
+
+   getReactionHelper(){
+      const reactionHelperObject = new reactionHelper(this.client, this.getGuildFromMessage().id, this.mainDB);
+      return reactionHelperObject;
    }
 
 }

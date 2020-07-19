@@ -18,9 +18,11 @@ Want to develope the online api/website? Look into src/server
 
 # TODO
 - Add Roles Via Reactions
-    - Configure which roles can be added with what reaction
+    - ~~Configure which roles can be added with what reaction~~ 19.July.2020
+    - Remove roles from that configuration 
+        - Update all Reactions in DB with new Info
     - Add reactions to Message
-    - Have a Database for all Messages that can add permission
+    - ~~Have a Database for all Messages that can add permission~~
     - Add Permission when reacted
     - Remove when reaction is rewoked
 - ~~Mute should add to the muted Database~~
