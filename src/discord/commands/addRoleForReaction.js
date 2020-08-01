@@ -18,8 +18,6 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
       super(discord, eventData, user, database, params); //call parent
    }
  
-   //TODO refactr this shit to not be a 80line long function. 
-   //preferably reusable functions for the del command
    execute(){
       //no doing shit if we aren't even allowed to
       if(this.isCommandAllowed(defaults.permissions) == false){
@@ -29,34 +27,51 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
 
       let messageStr = this.event.content;
       let reactionHelper = this.getReactionHelper();
-      let permissionHelper = this.getPermissionHelper();
 
       let emoteArray = reactionHelper.getEmoteFromString(messageStr);
       let roleMap = this.getMentionRoles();
       
-      if(emoteArray.length == 0){
-         this.event.channel.send('No Emote specified');
-         return false;
-      }
+      
 
-      if(roleMap.size == 0){
-         this.event.channel.send('No Role specified');
-      }
-
-      //We need both and make it a nice pair
+      //If we have more than one role only the last is used. Don't care right now to fix it TODO
       let roleId = null;
       roleMap.forEach(role => {
-         roleId = role.id; //only give us the first one 
-         return;
+         roleId = role.id; 
       }); 
 
       let emoteId = emoteArray[0]; //We know it has atleast one value
 
-      let assignmentObj = {emoteId : emoteId, roleId: roleId};
+      if(this.checkValid(emoteArray, roleMap) == false){
+         return;
+      }
 
       let reactionDb = this.reactionDatabase();
+
+      this.updateDatabase(emoteId, reactionDb, roleId);
+      
+   }
+
+   checkValid(emoteArray, roleMap){
+      let returnVal = true;
+      if(emoteArray.length == 0){
+         this.event.channel.send('No Emote specified');
+         returnVal = false;
+      }
+
+      if(roleMap.size == 0){
+         this.event.channel.send('No Role specified');
+         returnVal = false;
+      }
+
+      return returnVal;
+   }
+
+   updateDatabase(emoteId, reactionDb, roleId){
       let existing = reactionDb.get('roleAndEmote').find({emoteId : emoteId});
+
       let resultObj = null; //init so no crash
+
+      let assignmentObj = {emoteId : emoteId, roleId: roleId};
 
       //Update this one
       if(existing.value() != null){ 
@@ -78,7 +93,7 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
 
       //when not exists, make new
       resultObj = reactionDb.get('roleAndEmote').push(assignmentObj).write();
-      this.respond(resultObj);
+      this.respond(resultObj[0]); //this time we get an array
       return true;
    }
 
