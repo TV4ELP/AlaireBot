@@ -1,4 +1,4 @@
-const BasicCommand = require('./addPermissionToRole.js').classObj;
+const AddPermissionToRole = require('./addPermissionToRole.js').classObj;
 
 
 const defaults = {
@@ -12,7 +12,7 @@ const defaults = {
 };
 
 module.exports.defaults = defaults;
-module.exports.classObj = class addPermissionToRole extends BasicCommand{
+module.exports.classObj = class delPermissionToRole extends AddPermissionToRole{
 
    constructor(discord, eventData, user, database, params){
       super(discord, eventData, user, database, params); //call parent
