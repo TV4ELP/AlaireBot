@@ -56,6 +56,13 @@ module.exports = class permissionHelper {
       return hasPermission;
    }
 
+   getGuildUserFromUser(user){
+      let guild = this.discordClient.guilds.resolve(this.guildId);
+      let guildUserManager = guild.members;
+      let member = guildUserManager.resolve(user.id);
+      return member;
+   }
+
    userHasRolePermissionsInner(permissionNameString, dbRoleValue){
       if(dbRoleValue.permissions.includes(permissionNameString)){
          return true;
@@ -72,6 +79,25 @@ module.exports = class permissionHelper {
          }
       }
       return false;
+   }
+
+   //Check if a user already has a role
+   userHasRole(roleId, user){
+      let guild = this.discordClient.guilds.resolve(this.guildId);
+      let roleManager = guild.roles;
+      let role = roleManager.resolve(roleId);
+      let users = role.members;
+      if(users.get(user.id)){
+         return true;
+      }else{
+         return false;
+      }
+   }
+
+   //Give a User a Role
+   userGiveRole(roleId, user){
+      let userRoleManager = user.roles;
+      userRoleManager.add(roleId);
    }
 
    userHasPermission(permissionNameString, user){

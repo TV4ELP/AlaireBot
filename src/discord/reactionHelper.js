@@ -34,6 +34,15 @@ module.exports = class reactionHelper extends permissionHelper {
       reactionDb.get('reaction').push(discordMessageId).write();
    }
 
+   //Get ReactionMessage from ID
+   isReactionInDB(discordMessageId){
+      let reactionDb = this.reactionDatabase();
+      //Dont't know if i can get it directly with lodash without that workaround...
+      let messageReactionArray = reactionDb.get('reaction').value();
+      let messageReaction = messageReactionArray.find(element => element == discordMessageId);
+      return messageReaction != null;
+   }
+
    // This is how a Discord Emote is build <:name:1234567890:>
    //We want only the ID
    getDiscordEmotesFromMessage(messageStr){

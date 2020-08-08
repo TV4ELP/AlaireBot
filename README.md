@@ -22,7 +22,7 @@ Want to develope the online api/website? Look into src/server
     - ~~Remove roles from that configuration~~ 01.August.2020
     - Add reactions to Message
     - ~~Have a Database for all Messages that can add permission~~
-    - Add Permission when reacted
+    - ~~Add Permission when reacted~~ 08.August.2020
     - Remove when reaction is rewoked
 - ~~Mute should add to the muted Database~~
 - Allow certain commands only in Bot Channels

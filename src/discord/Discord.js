@@ -2,7 +2,8 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const DiscordJS = require('discord.js');
 const fs = require('fs');
-const permissionHelper = require('./permissionHelper')
+const permissionHelper = require('./permissionHelper');
+const reactionHelper = require('./reactionHelper');
 
 module.exports = class Discord {
    constructor(db){
@@ -61,34 +62,44 @@ module.exports = class Discord {
       let serverStorage = this.GetServerStorage(eventData);
       switch (type) {
          case "REACTIONADD":{
-               command += "Reactionadd";
-               break;
+            let message = eventData.message;
+            serverStorage = this.GetServerStorage(message);
+            let reactionHlp = new reactionHelper(this, message.guild.id, this.mainDB);
+            let isInDB = reactionHlp.isReactionInDB(message.id);
+            if(isInDB){
+               let params = {messageId: message.id, emote: eventData.emoji};
+               try {
+                  let commandClass = new(require('./commands/addRoleFromReaction.js').classObj)(this, eventData, user, serverStorage, params);
+                  commandClass.execute();
+               } catch (error) {
+                  console.log(error.message);
+               }
+            }
+            break;
          }
 
          case "REACTIONREMOVE":{
-               params = this.GetParamsFromReaction(eventData, type);
-               command += "ReactionRemove";
-               break;
+            break;
          }  
 
          case "MESSAGE":{
-               //Handle Messages
-               let content = eventData.content;
-               if(eventData.author.bot){
-                  break; //Just die here, no need to do shit when you are a bot
-               }
-               this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
-                  let params = this.GetParamsFromMessage(eventData, commandObj)
-                  let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
-                  commandClass.execute();
-               }).catch(errorObj => {
-                  this.HandleProcessCommandError(errorObj, type, eventData, user, serverStorage, retry);
-               });
+            //Handle Messages
+            let content = eventData.content;
+            if(eventData.author.bot){
+               break; //Just die here, no need to do shit when you are a bot
+            }
+            this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
+               let params = this.GetParamsFromMessage(eventData, commandObj)
+               let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
+               commandClass.execute();
+            }).catch(errorObj => {
+               this.HandleProcessCommandError(errorObj, type, eventData, user, serverStorage, retry);
+            });
          }
 
          default:{
-               command + "default";
-               break;
+            command + "default";
+            break;
          }
       }
       return command += ".js";

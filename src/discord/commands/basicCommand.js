@@ -76,7 +76,12 @@ module.exports.classObj = class BasicCommand {
    }
 
    getGuildFromMessage(){
-      return this.event.guild;
+      let guild = this.event.guild;
+      if(guild == null){
+         guild = this.event.message.guild;
+      }
+
+      return guild;
    }
 
    isCommandAllowed(permissions){
