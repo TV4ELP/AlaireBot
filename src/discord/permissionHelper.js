@@ -100,6 +100,12 @@ module.exports = class permissionHelper {
       userRoleManager.add(roleId);
    }
 
+   //Remove a Role from a User
+   userDelRole(roleId, user){
+      let userRoleManager = user.roles;
+      userRoleManager.remove(roleId);
+   }
+
    userHasPermission(permissionNameString, user){
       let permissionDb = this.getPermissionDB();
       let dbUser = permissionDb.get('users').get(user.id).value();

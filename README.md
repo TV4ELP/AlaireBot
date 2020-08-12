@@ -23,7 +23,7 @@ Want to develope the online api/website? Look into src/server
     - Add reactions to Message
     - ~~Have a Database for all Messages that can add permission~~
     - ~~Add Permission when reacted~~ 08.August.2020
-    - Remove when reaction is rewoked
+    - ~~Remove when reaction is rewoked~~ 12.August.2020
 - ~~Mute should add to the muted Database~~
 - Allow certain commands only in Bot Channels
 - ~~Allow certain commands only by certain roles~~

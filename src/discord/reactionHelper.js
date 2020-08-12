@@ -8,6 +8,14 @@ module.exports = class reactionHelper extends permissionHelper {
       super(discordClient, guildId, mainDB);
    }
 
+   setupPermissionDBForGuild(){
+      let storageFile = this.storagePath + this.guildId + '/reaction.json';
+
+      let reactionDB = low(new FileSync(storageFile));
+      reactionDB.defaults({reaction : [], roleAndEmote : []}).write();
+      this.guildDB.set('reactionDatabasePath', storageFile).write();
+   }
+
    getEmoteFromString(str){
       let results = Array();
       return results

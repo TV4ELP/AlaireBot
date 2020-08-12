@@ -4,6 +4,7 @@ const DiscordJS = require('discord.js');
 const fs = require('fs');
 const permissionHelper = require('./permissionHelper');
 const reactionHelper = require('./reactionHelper');
+const kickWatcher = require('./watcher/kickWatcher');
 
 module.exports = class Discord {
    constructor(db){
@@ -14,7 +15,7 @@ module.exports = class Discord {
    }
 
    StartWatcher(){
-      let watcher = new(require('./watcher/kickWatcher.js'))(this.client);
+      let watcher = new kickWatcher(this.client);
       watcher.watch();
    }
 
@@ -22,27 +23,26 @@ module.exports = class Discord {
       this.client.login(fs.readFileSync('discord.key', 'utf8'))
    }
 
-   //Get all Events and then shoot them off to the next steop
+   //Get all Events and then shoot them off to the next step
    RegisterEvents(){
       this.client.on('messageReactionAdd', async(reaction, user) => {
-         //IF we have any uncached Data, make sure we get all the info we need. 
          //This allows us to listen for old message reactions after a restart of the bot
          if(reaction.message.partial) await reaction.message.fetch();
          if(reaction.partial) await reaction.fetch();
-         this.ProcessEvent(reaction, user, 'REACTIONADD');
+         this.HandleReaction(reaction, user, "ADD");
       });
 
       this.client.on('messageReactionRemove', async(reaction, user) => {
          if(reaction.message.partial) await reaction.message.fetch();
          if(reaction.partial) await reaction.fetch();
-         this.ProcessEvent(reaction, user, 'REACTIONREMOVE');
+         this.HandleReaction(reaction, user, "REMOVE");
       });
 
       this.client.on('message', async(message, user) => {
-         //IF a message added shouldn't be cached for any weird reason.
-         //Just gets rid of potential errors down the line
          if(message.partial) await message.fetch();
-         this.ProcessEvent(message, message.author, 'MESSAGE');
+         if(!message.author.bot){
+            this.HandleTextEvent(message, user);
+         }
       });
 
       //Guild join is never partial
@@ -52,72 +52,38 @@ module.exports = class Discord {
 
    }
 
-   ProcessEvent(eventData, user, type){
-      let command = this.FindAndProcessCommand(type, eventData, user);       
-   }
-
-   //Based on the command we need to do different things
-   FindAndProcessCommand(type, eventData, user, retry = false){
-      let command = "";
-      let serverStorage = this.GetServerStorage(eventData);
-      switch (type) {
-         case "REACTIONADD":{
-            let message = eventData.message;
-            serverStorage = this.GetServerStorage(message);
-            let reactionHlp = new reactionHelper(this, message.guild.id, this.mainDB);
-            let isInDB = reactionHlp.isReactionInDB(message.id);
-            if(isInDB){
-               let params = {messageId: message.id, emote: eventData.emoji};
-               try {
-                  let commandClass = new(require('./commands/addRoleFromReaction.js').classObj)(this, eventData, user, serverStorage, params);
-                  commandClass.execute();
-               } catch (error) {
-                  console.log(error.message);
-               }
-            }
-            break;
-         }
-
-         case "REACTIONREMOVE":{
-            break;
-         }  
-
-         case "MESSAGE":{
-            //Handle Messages
-            let content = eventData.content;
-            if(eventData.author.bot){
-               break; //Just die here, no need to do shit when you are a bot
-            }
-            this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
-               let params = this.GetParamsFromMessage(eventData, commandObj)
-               let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, eventData, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
-               commandClass.execute();
-            }).catch(errorObj => {
-               this.HandleProcessCommandError(errorObj, type, eventData, user, serverStorage, retry);
-            });
-         }
-
-         default:{
-            command + "default";
-            break;
+   HandleReaction(eventData, user, type){
+      let commandName = type == "ADD" ? "addRoleFromReaction.js" : "delRoleFromReaction.js";
+      let message = eventData.message;
+      let serverStorage = this.GetServerStorage(message);
+      let reactionHlp = new reactionHelper(this, message.guild.id, this.mainDB);
+      let isInDB = reactionHlp.isReactionInDB(message.id);
+      if(isInDB){
+         let params = {messageId: message.id, emote: eventData.emoji};
+         try {
+            let commandClass = new(require('./commands/' + commandName).classObj)(this, eventData, user, serverStorage, params);
+            commandClass.execute();
+         } catch (error) {
+            console.log(error.message);
          }
       }
-      return command += ".js";
    }
 
-   HandleProcessCommandError(errorObj, type, eventData, user, serverStorage, retry){
+   HandleTextEvent(messageEvent, user){
+      let content = messageEvent.content;
+      let serverStorage = this.GetServerStorage(messageEvent);
+      this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
+         let params = this.GetParamsFromMessage(messageEvent, commandObj)
+         let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, messageEvent, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
+         commandClass.execute();
+      }).catch(errorObj => {
+         this.HandleProcessCommandError(errorObj, messageEvent);
+      });
+   }
+
+   HandleProcessCommandError(errorObj, eventData){
       if(errorObj.message.includes('NOT FOUND')){
-         //lets try to get the command if it doesn't exist
-         if(retry == false){
-            let commands = this.GetAllCommands();
-            commands.forEach(value =>{
-               serverStorage.get('commands').remove({filePath: value.defaults.filePath}).write();
-               serverStorage.get('commands').push(value.defaults).write();
-            });
-            this.FindAndProcessCommand(type, eventData, user, true);
-         }else{
-            eventData.reply("Me no knowing what dis means");
-         }
+         //eventData.reply("Me no knowing what dis means"); 
       }else{
          eventData.reply("Uhmmm... i'm not feeling so well... i notified a doctor already");
          let cache = this.client.users.cache;
@@ -125,7 +91,6 @@ module.exports = class Discord {
             dmChannel.send(errorObj.stack);
          });
       }
-      console.log(errorObj.stack);
    }
 
    CreateDefaults(guild){
@@ -135,30 +100,18 @@ module.exports = class Discord {
       let guildId = guild.id;
       let storagePath = 'storage/' + guildId + '/';
       let mutedDatabaseFilePath = storagePath + 'muted.json';
-      let reactionDatabaseFilePath = storagePath + 'reactions.json';
-      
 
       //get all commands and fill in
       let commands = this.GetAllCommands();
       commands.forEach(value =>{
+         database.get('commands').remove({filePath: value.defaults.filePath}).write(); //Delete them just to be on the safe side
          database.get('commands').push(value.defaults).write();
       });
+
       let roleManager = guild.roles;
       let roles = roleManager.cache;
       let role = roles.find(role => role.name == "Muted");
-      if(role == null){
-         roleManager.create({
-               data: {
-                  name: 'Muted',
-                  color: 'BLUE',
-               },
-               reason: 'Bot initialisation for role',
-         }).then(newRole => {
-               database.set('muterole', newRole.id).write();
-         });
-      }else{
-         database.set('muterole', role.id).write();
-      }
+      role == null ? this.CreateMuteRole(roleManager, database) : database.set('muterole', role.id).write();
       
       //Database for all Muted Member.
       //currentlymuted = memberId => {timestamp, timeinseconds}
@@ -167,19 +120,31 @@ module.exports = class Discord {
       mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
       database.set('muteDatabasePath', mutedDatabaseFilePath).write();
       
-      //We need to add it manually here, because only all available guild at the start are watched, not new ones
-      let watcher = new(require('./watcher/kickWatcher.js'))(this.client);
+      //We need to add it manually here, because only available guilds at the start are watched, not new ones
+      let watcher = new kickWatcher(this.client);
       watcher.watchSingleGuild(guildId);
 
-      let reactionDB = low(new FileSync(reactionDatabaseFilePath));
-      reactionDB.defaults({reaction : [], roleAndEmote : []}).write();
-      database.set('reactionDatabasePath', reactionDatabaseFilePath).write();
+      let reactionHlp = new reactionHelper(this, message.guild.id, this.mainDB);
+      reactionHlp.setupPermissionDBForGuild();
 
       let permissionHelperObj = new permissionHelper(this.client, guildId, this.mainDB);
       permissionHelperObj.setupPermissionDBForGuild();
    }
 
+   CreateMuteRole(roleManager, database){
+      roleManager.create({
+         data: {
+            name: 'Muted',
+            color: 'BLUE',
+         },
+         reason: 'Bot initialisation for role',
+      }).then(newRole => {
+            database.set('muterole', newRole.id).write();
+      });
+   }
+
    //Get all parameter from a message
+   //TODO Should maybe be in the BasicCommandClass
    GetParamsFromMessage(message, commandObj){
       //first lets remove the command from the content
       let content = message.content;
@@ -210,9 +175,7 @@ module.exports = class Discord {
             message : 'COMMAND NOT FOUND:' + contentString
          };
          reject(exceptionObj);
-
       });
-
       return commandPromise;
    }
 
@@ -222,15 +185,11 @@ module.exports = class Discord {
       let guild = event.guild;
 
       //no guild, no doing stuff
-      if(guild == null){
-         return null;
-      }
-      if(guild.available == false){
+      if(guild == null || guild.available == false){
          return null;
       }
 
-      let guildId = guild.id;
-      let storagePath = 'storage/' + guildId + '/';
+      let storagePath = 'storage/' + guild.id + '/';
       let storageFile = storagePath + 'config.json';
 
       //If no Databse exists we need to create it.
@@ -240,9 +199,10 @@ module.exports = class Discord {
          //Create the BASE structure
          //forcedStart, with what charakter the bot executes basic commands
          database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
+         //Setup 
+         this.CreateDefaults(guild);
          return database;
       }
-
       return low(new FileSync(storageFile));
    }
 
@@ -257,12 +217,5 @@ module.exports = class Discord {
          defaults.push(obj);
       });
       return defaults;
-   }
-
-   GetParamsFromReaction(reaction, type){
-      let params = {};
-      params.type = type == "REACTIONADD" ? true : false;
-
-      return params;
    }
 }
