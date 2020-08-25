@@ -38,9 +38,10 @@ module.exports = class Discord {
          this.HandleReaction(reaction, user, "REMOVE");
       });
 
-      this.client.on('message', async(message, user) => {
+      this.client.on('message', async(message) => {
          if(message.partial) await message.fetch();
          if(!message.author.bot){
+            let user = message.author;
             this.HandleTextEvent(message, user);
          }
       });
@@ -166,7 +167,7 @@ module.exports = class Discord {
          for(let i in commands){
                let name = commands[i].command.toUpperCase();
                let enabled = commands[i].enabled;
-               if(contenStringUP.includes(name) && enabled){
+               if(contenStringUP.includes(name) && enabled && name != ''){
                   resolve(commands[i]);
                }
          }

@@ -31,10 +31,6 @@ module.exports.classObj = class KickUser extends BasicCommand{
          return;
       }
 
-      if(this.isCommandAllowed() == false){
-         return;//Maybe Log and kill later if he does it too much
-      }
-
       mentions.each(user => {
          if(this.isAlreadyMuted(user) == false){
                user.roles.add(this.muteRoleId(), "Muted by User " + this.user.displayName)
