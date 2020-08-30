@@ -125,7 +125,7 @@ module.exports = class Discord {
       let watcher = new kickWatcher(this.client);
       watcher.watchSingleGuild(guildId);
 
-      let reactionHlp = new reactionHelper(this, message.guild.id, this.mainDB);
+      let reactionHlp = new reactionHelper(this.client, guildId, this.mainDB);
       reactionHlp.setupPermissionDBForGuild();
 
       let permissionHelperObj = new permissionHelper(this.client, guildId, this.mainDB);
@@ -182,7 +182,7 @@ module.exports = class Discord {
 
    //We need the Database for the Sprcific Server
    //Create if not Found
-   GetServerStorage(event){
+   GetServerStorage(event, setup = false){
       let guild = event.guild;
 
       //no guild, no doing stuff
@@ -200,8 +200,10 @@ module.exports = class Discord {
          //Create the BASE structure
          //forcedStart, with what charakter the bot executes basic commands
          database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
-         //Setup 
-         this.CreateDefaults(guild);
+         //If we are already in the setup, dont't do it again
+         if(setup){
+            this.CreateDefaults(guild);
+         }
          return database;
       }
       return low(new FileSync(storageFile));
