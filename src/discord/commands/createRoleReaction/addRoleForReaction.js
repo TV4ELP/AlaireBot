@@ -1,4 +1,4 @@
-const BasicCommand = require('./basicCommand.js').classObj;
+const BasicCommand = require('../basicCommand.js').classObj;
 
 
 const defaults = {

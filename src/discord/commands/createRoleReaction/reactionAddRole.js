@@ -1,16 +1,16 @@
-const addRoleFromReaction = require('./addRoleFromReaction.js').classObj;
+const AddRoleForReaction = require('./addRoleForReaction.js').classObj;
 
 
 const defaults = {
    command : "",
-   filePath : "delRoleFromReaction.js",
+   filePath : "reactionAddRole.js",
    forcedStart : false,
    enabled : true,
    permissions : []
 };
 
 module.exports.defaults = defaults;
-module.exports.classObj = class delRoleFromReaction extends addRoleFromReaction{
+module.exports.classObj = class reactionAddRole extends AddRoleForReaction{
 
    constructor(discord, eventData, user, database, params){
       super(discord, eventData, user, database, params); //call parent
@@ -36,9 +36,27 @@ module.exports.classObj = class delRoleFromReaction extends addRoleFromReaction{
 
       let pair = existing.value();
       let roleId = pair.roleId;
-
+      //we need an actual guilduser here
       if(reactionHelper.userHasRole(roleId, reactionHelper.getGuildUserFromUser(this.user))){
-         reactionHelper.userDelRole(roleId, reactionHelper.getGuildUserFromUser(this.user));
+         this.respondAlreadyHas();
+         return;
       }
+
+      reactionHelper.userGiveRole(roleId, reactionHelper.getGuildUserFromUser(this.user));
+      this.respondGiven(roleId, reactionHelper);
+
    }
+
+   //give Feedback if the Role is already assigned
+   respondAlreadyHas(){
+
+   }   
+
+   //giveFeedback when you get the role
+   respondGiven(roleId, reactionHelper){
+      //let role = reactionHelper.getRoleById(roleId); //assume it exists for now
+      //this.event.message.channel.send('Role ' + role.name + ' is now yours');
+   }
+
+
 }

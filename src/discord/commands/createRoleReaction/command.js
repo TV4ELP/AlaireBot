@@ -1,4 +1,4 @@
-const BasicCommand = require('./basicCommand').classObj;
+const BasicCommand = require('../basicCommand').classObj;
 const DiscordJS = require('discord.js'); //For Embeds
 
 

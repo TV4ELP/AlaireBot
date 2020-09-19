@@ -20,7 +20,7 @@ Want to develope the online api/website? Look into src/server
 - Add Roles Via Reactions
     - ~~Configure which roles can be added with what reaction~~ 19.July.2020
     - ~~Remove roles from that configuration~~ 01.August.2020
-    - Add reactions to Message
+    - ~~Add reactions to Message~~
     - ~~Have a Database for all Messages that can add permission~~
     - ~~Add Permission when reacted~~ 08.August.2020
     - ~~Remove when reaction is rewoked~~ 12.August.2020

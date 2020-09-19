@@ -18,8 +18,9 @@ module.exports = class Main {
          (fs.existsSync('./storage') == false ? fs.mkdirSync('./storage') : null);   
       });
    
-      console.log('CREATED INITIAL CONFIG => SHUTTING DOWN');
-      process.exit(1);
+      console.log('CREATED INITIAL CONFIG');
+      //We now have our DB, return it. 
+      return this.AfterStart();
    }
 
 
