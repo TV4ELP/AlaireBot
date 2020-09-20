@@ -74,8 +74,9 @@ module.exports = class Discord {
       let content = messageEvent.content;
       let serverStorage = this.GetServerStorage(messageEvent);
       this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
-         let params = this.GetParamsFromMessage(messageEvent, commandObj)
-         let commandClass = new(require('./commands/' + commandObj.filePath).classObj)(this, messageEvent, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
+         let params = this.GetParamsFromMessage(messageEvent, commandObj);
+         let path = commandObj.filePath + '/command.js';
+         let commandClass = new(require(path).classObj)(this, messageEvent, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
          commandClass.execute();
       }).catch(errorObj => {
          this.HandleProcessCommandError(errorObj, messageEvent);
@@ -149,7 +150,7 @@ module.exports = class Discord {
    GetParamsFromMessage(message, commandObj){
       //first lets remove the command from the content
       let content = message.content;
-      content = content.replace(commandObj.name,'');
+      content = content.replace(commandObj.command,'');
       //we already handel mentions in the basicCommand, so out with those too
       content = content.replace(/<@.*?>/g, '').trim();
       //Now we have the mostly clean message (hopefully)
@@ -213,11 +214,14 @@ module.exports = class Discord {
    // defauls / class
    GetAllCommands(){
       let defaults = [];
-      let path = 'src/discord/';
-      let dirContent = fs.readdirSync(path + 'commands');
-      dirContent.forEach((value, key) => {
-         let obj = require('./commands/' + value);
-         defaults.push(obj);
+      let path = 'src/discord/commands/';
+      let commandsFolder = fs.readdirSync(path);
+      commandsFolder.forEach((value, key) => {
+         let newPath = path + value;
+         if(fs.lstatSync(newPath).isDirectory()){
+            let obj = require('./commands/' + value + '/command.js');
+            defaults.push(obj);
+         }
       });
       return defaults;
    }

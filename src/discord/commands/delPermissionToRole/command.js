@@ -1,9 +1,9 @@
-const BasicCommand = require('./basicCommand.js').classObj;
+const AddPermissionToRole = require('../addPermissionToRole/command').classObj;
 
 
 const defaults = {
-   command : "/addPermission",
-   filePath : "addPermissionToRole.js",
+   command : "/removePermission",
+   filePath : "delPermissionToRole.js",
    forcedStart : true,
    enabled : true,
    permissions : [
@@ -12,7 +12,7 @@ const defaults = {
 };
 
 module.exports.defaults = defaults;
-module.exports.classObj = class addPermissionToRole extends BasicCommand{
+module.exports.classObj = class delPermissionToRole extends AddPermissionToRole{
 
    constructor(discord, eventData, user, database, params){
       super(discord, eventData, user, database, params); //call parent
@@ -33,20 +33,20 @@ module.exports.classObj = class addPermissionToRole extends BasicCommand{
 
       permissions.forEach(permissionString =>{
          userMentions.each(user => {
-            if(permissionHelper.userHasPermission(permissionString, user) == false){
-               permissionHelper.userGivePermission(permissionString, user);
-               this.event.channel.send("User updated with permission: " + user.displayName);
+            if(permissionHelper.userHasPermission(permissionString, user) == true){
+               permissionHelper.userDelPermission(permissionString, user);
+               this.event.channel.send("removed permission from User: " + user.displayName);
             }else{
-               this.event.channel.send("User already had that permission: " + user.displayName);
+               this.event.channel.send("User did not have that permission: " + user.displayName);
             }
          });
    
          roleMentions.each(role => {
-            if(permissionHelper.roleHasPermission(permissionString, role) == false){
-               permissionHelper.roleGivePermission(permissionString, role);
-               this.event.channel.send("Role updated with permission: " + role.name);
+            if(permissionHelper.roleHasPermission(permissionString, role) == true){
+               permissionHelper.roleDelPermission(permissionString, role);
+               this.event.channel.send("removed Permission from role: " + role.name);
             }else{
-               this.event.channel.send("Role already had that permission: " + role.name);
+               this.event.channel.send("Role did not have that permission: " + role.name);
             }
          });
       });

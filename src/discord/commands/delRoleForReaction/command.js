@@ -1,4 +1,4 @@
-const addRoleForReaction = require('./addRoleForReaction.js').classObj;
+const addRoleForReaction = require('../addRoleForReaction/command').classObj;
 
 
 const defaults = {

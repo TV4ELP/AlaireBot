@@ -1,12 +1,14 @@
-const BasicCommand = require('./basicCommand.js').classObj;
+const BasicCommand = require('../basicCommand.js').classObj;
 
 
 const defaults = {
-   command : "/help",
-   filePath : "help.js",
+   command : "/addRoleForReaction",
+   filePath : __dirname,
    forcedStart : true,
    enabled : true,
-   permissions : []
+   permissions : [
+      "admin"
+    ]
 };
 
 module.exports.defaults = defaults;
@@ -23,9 +25,8 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
          return false;
       }   
 
-      //Get all commands
-      database.get('commands').value();
-      
+      let messageStr = this.event.content;
+      let reactionHelper = this.getReactionHelper();
 
       let emoteArray = reactionHelper.getEmoteFromString(messageStr);
       let roleMap = this.getMentionRoles();
