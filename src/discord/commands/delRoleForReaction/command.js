@@ -3,7 +3,7 @@ const addRoleForReaction = require('../addRoleForReaction/command').classObj;
 
 const defaults = {
    command : "/delRoleForReaction",
-   filePath : "delRoleForReaction.js",
+   filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [

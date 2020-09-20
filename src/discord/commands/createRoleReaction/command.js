@@ -4,7 +4,7 @@ const DiscordJS = require('discord.js'); //For Embeds
 
 const defaults = {
    command : "/permissions",
-   filePath : "createRoleReaction.js",
+   filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [

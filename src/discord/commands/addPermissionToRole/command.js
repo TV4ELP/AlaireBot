@@ -3,7 +3,7 @@ const BasicCommand = require('../basicCommand.js').classObj;
 
 const defaults = {
    command : "/addPermission",
-   filePath : "addPermissionToRole.js",
+   filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [

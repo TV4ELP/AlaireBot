@@ -1,7 +1,7 @@
 const BasicCommand = require('../basicCommand.js').classObj;
 const defaults = {
    command : "/login",
-   filePath : "webLogin.js",
+   filePath : __dirname,
    forcedStart : true,
    enabled : false,
    permissions : [

@@ -2,7 +2,7 @@ const BasicCommand = require('../basicCommand.js').classObj;
 
 const defaults = {
    command : "/kick",
-   filePath : "kickUser.js",
+   filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [

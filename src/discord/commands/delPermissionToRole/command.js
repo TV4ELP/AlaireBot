@@ -3,7 +3,7 @@ const AddPermissionToRole = require('../addPermissionToRole/command').classObj;
 
 const defaults = {
    command : "/removePermission",
-   filePath : "delPermissionToRole.js",
+   filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [
