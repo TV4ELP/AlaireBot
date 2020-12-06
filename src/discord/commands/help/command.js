@@ -21,6 +21,12 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
       if(this.isCommandAllowed(defaults.permissions) == false){
          this.event.channel.send('You dont have the Permissions needed')
          return false;
-      }        
+      }
+      
+      //Gotta need all Commands to Help ya find what you need
+      const allCommands = this.discord.GetAllCommands();
+      commands.forEach(value =>{
+         
+      });
    }
 }

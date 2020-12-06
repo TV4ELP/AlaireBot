@@ -37,18 +37,19 @@ module.exports = class reactionHelper extends permissionHelper {
    }
 
    //We need to register the Message ID so we can check on which Reaction was Reacted on, and if we want to do anything with it
-   registerReactionMessage(discordMessageId){
+   registerReactionMessage(discordMessageId, commandDefaults){
       let reactionDb = this.reactionDatabase();
-      reactionDb.get('reaction').push(discordMessageId).write();
+      const dir = commandDefaults.filePath;
+      const reactionObj = {discordMessageId, dir};
+      reactionDb.get('reaction').push(reactionObj).write();
    }
 
    //Get ReactionMessage from ID
-   isReactionInDB(discordMessageId){
+   getReactionInDB(discordMessageId){
       let reactionDb = this.reactionDatabase();
-      //Dont't know if i can get it directly with lodash without that workaround...
-      let messageReactionArray = reactionDb.get('reaction').value();
-      let messageReaction = messageReactionArray.find(element => element == discordMessageId);
-      return messageReaction != null;
+      let messageReaction = reactionDb.get('reaction').find({discordMessageId : discordMessageId}).value();
+
+      return messageReaction;
    }
 
    // This is how a Discord Emote is build <:name:1234567890:>

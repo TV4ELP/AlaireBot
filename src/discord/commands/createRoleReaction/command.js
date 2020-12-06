@@ -32,7 +32,7 @@ module.exports.classObj = class createRoleReactions extends BasicCommand{
       let message = this.createReactionMessage(pairs, reactionHelper);
 
       this.event.channel.send(message).then(discordMessage => {
-         reactionHelper.registerReactionMessage(discordMessage.id);
+         reactionHelper.registerReactionMessage(discordMessage.id, defaults);
          this.addDefaultReactions(pairs, discordMessage, reactionHelper);
       });
    }

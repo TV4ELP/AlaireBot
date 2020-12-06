@@ -21,6 +21,7 @@ module.exports.classObj = class BasicCommand {
       this.database = database;
       this.permissions = [];
       this.mainDB = discord.mainDB;
+      this.discord = discord;
    }
 
    execute(){
@@ -114,6 +115,11 @@ module.exports.classObj = class BasicCommand {
 
       return this.params;
       
+   }
+
+   //If we need Custom Params for like a reaction
+   setCustomParams(paramsObj){
+      this.params = paramsObj;
    }
 
 }

@@ -1,16 +1,16 @@
-const reactionAddRole = require('./reactionAddRole.js').classObj;
+const AddRoleForReaction = require('../addRoleForReaction/command').classObj;
 
 
 const defaults = {
    command : "",
-   filePath : "reactionRemoveRole.js",
+   filePath : "reactionAddRole.js",
    forcedStart : false,
    enabled : true,
    permissions : []
 };
 
 module.exports.defaults = defaults;
-module.exports.classObj = class reactionRemoveRole extends reactionAddRole{
+module.exports.classObj = class reactionAddRole extends AddRoleForReaction{
 
    constructor(discord, eventData, user, database, params){
       super(discord, eventData, user, database, params); //call parent
@@ -37,8 +37,24 @@ module.exports.classObj = class reactionRemoveRole extends reactionAddRole{
       let pair = existing.value();
       let roleId = pair.roleId;
 
-      if(reactionHelper.userHasRole(roleId, reactionHelper.getGuildUserFromUser(this.user))){
-         reactionHelper.userDelRole(roleId, reactionHelper.getGuildUserFromUser(this.user));
-      }
+      //we need to fetch the dumb stupid USer because DIscord JS is dumb and caches shit in dumb ways
+      this.client.guilds.fetch(this.reactionHelper).then( guild => {
+         guild.members.fetch(this.user.id).then(user => {
+            reactionHelper.userGiveRole(roleId, user);
+            this.respondGiven(roleId, reactionHelper);
+         });
+      });
+
+
    }
+
+ 
+
+   //giveFeedback when you get the role
+   respondGiven(roleId, reactionHelper){
+      //let role = reactionHelper.getRoleById(roleId); //assume it exists for now
+      //this.event.message.channel.send('Role ' + role.name + ' is now yours');
+   }
+
+
 }

@@ -9,7 +9,9 @@ const kickWatcher = require('./watcher/kickWatcher');
 module.exports = class Discord {
    constructor(db){
       this.mainDB = db;
-      this.client = new DiscordJS.Client({partials : ['MESSAGE', 'CHANNEL', 'REACTION']});
+      this.client = new DiscordJS.Client({
+         partials : ['MESSAGE', 'CHANNEL', 'REACTION', "USER"]         
+      });
       this.RegisterEvents();
       this.StartWatcher();
    }
@@ -27,20 +29,23 @@ module.exports = class Discord {
    RegisterEvents(){
       this.client.on('messageReactionAdd', async(reaction, user) => {
          //This allows us to listen for old message reactions after a restart of the bot
-         if(reaction.message.partial) await reaction.message.fetch();
          if(reaction.partial) await reaction.fetch();
+         if(user.partial) await user.fetch();
+         if(reaction.message.partial) await reaction.message.fetch();
          this.HandleReaction(reaction, user, "ADD");
       });
 
       this.client.on('messageReactionRemove', async(reaction, user) => {
-         if(reaction.message.partial) await reaction.message.fetch();
          if(reaction.partial) await reaction.fetch();
+         if(user.partial) await user.fetch();
+         if(reaction.message.partial) await reaction.message.fetch();
          this.HandleReaction(reaction, user, "REMOVE");
       });
 
       this.client.on('message', async(message) => {
          if(message.partial) await message.fetch();
-         if(!message.author.bot){
+         if(!message.author.bot)
+            if(message.author.partial) await user.fetch();{
             let user = message.author;
             this.HandleTextEvent(message, user);
          }
@@ -54,15 +59,16 @@ module.exports = class Discord {
    }
 
    HandleReaction(eventData, user, type){
-      let commandName = type == "ADD" ? "addRoleFromReaction.js" : "delRoleFromReaction.js";
+      let commandName = type == "ADD" ? "addRole.js" : "removeRole.js";
       let message = eventData.message;
       let serverStorage = this.GetServerStorage(message);
       let reactionHlp = new reactionHelper(this, message.guild.id, this.mainDB);
-      let isInDB = reactionHlp.isReactionInDB(message.id);
-      if(isInDB){
+      let reaction = reactionHlp.getReactionInDB(message.id);
+      if(reaction){
          let params = {messageId: message.id, emote: eventData.emoji};
          try {
-            let commandClass = new(require('./commands/' + commandName).classObj)(this, eventData, user, serverStorage, params);
+            let commandClass = new(require(reaction.dir + '/' + commandName).classObj)(this, eventData, user, serverStorage);
+            commandClass.setCustomParams(params);
             commandClass.execute();
          } catch (error) {
             console.log(error.message);
