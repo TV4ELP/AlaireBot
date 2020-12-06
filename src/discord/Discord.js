@@ -74,9 +74,10 @@ module.exports = class Discord {
       let content = messageEvent.content;
       let serverStorage = this.GetServerStorage(messageEvent);
       this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
-         let params = this.GetParamsFromMessage(messageEvent, commandObj);
          let path = commandObj.filePath + '/command.js';
-         let commandClass = new(require(path).classObj)(this, messageEvent, user, serverStorage, params); //Create a new CommandObject with the Client inserted.
+         let commandClass = new(require(path).classObj)(this, messageEvent, user, serverStorage); //Create a new CommandObject with the Client inserted.
+         //Preconfigure Params
+         commandClass.getParamsFromMessage(messageEvent, commandObj);
          commandClass.execute();
       }).catch(errorObj => {
          this.HandleProcessCommandError(errorObj, messageEvent);
@@ -143,20 +144,6 @@ module.exports = class Discord {
       }).then(newRole => {
             database.set('muterole', newRole.id).write();
       });
-   }
-
-   //Get all parameter from a message
-   //TODO Should maybe be in the BasicCommandClass
-   GetParamsFromMessage(message, commandObj){
-      //first lets remove the command from the content
-      let content = message.content;
-      content = content.replace(commandObj.command,'');
-      //we already handel mentions in the basicCommand, so out with those too
-      content = content.replace(/<@.*?>/g, '').trim();
-      //Now we have the mostly clean message (hopefully)
-      //Arguments (for now) are space separated
-      let args = content.match(/[^\s"]+|"([^"]*)"/ig);
-      return args;
    }
 
    //Returns a Promise with the command or Error

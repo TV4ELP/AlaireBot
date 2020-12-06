@@ -14,12 +14,11 @@ const defaults = {
 
 module.exports.defaults  = defaults;
 module.exports.classObj = class BasicCommand {
-   constructor(discord, eventData, user, database, params){
+   constructor(discord, eventData, user, database){
       this.client = discord.client;
       this.event = eventData;
       this.user = user;
       this.database = database;
-      this.params = params;
       this.permissions = [];
       this.mainDB = discord.mainDB;
    }
@@ -98,6 +97,23 @@ module.exports.classObj = class BasicCommand {
    getReactionHelper(){
       const reactionHelperObject = new reactionHelper(this.client, this.getGuildFromMessage().id, this.mainDB);
       return reactionHelperObject;
+   }
+
+   //Get all parameter from a message
+   getParamsFromMessage(message, commandObj){
+      if(this.params == null){
+         //first lets remove the command from the content
+         let content = message.content;
+         content = content.replace(commandObj.command,'');
+         //we already handel mentions in the basicCommand, so out with those too
+         content = content.replace(/<@.*?>/g, '').trim();
+         //Now we have the mostly clean message (hopefully)
+         //Arguments (for now) are space separated
+         this.params = content.match(/[^\s"]+|"([^"]*)"/ig);
+      }
+
+      return this.params;
+      
    }
 
 }
