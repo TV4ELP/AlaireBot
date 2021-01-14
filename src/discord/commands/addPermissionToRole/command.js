@@ -8,7 +8,8 @@ const defaults = {
    enabled : true,
    permissions : [
       "admin"
-    ]
+   ],
+   params : '@User/@Role + Permission Name'
 };
 
 module.exports.defaults = defaults;

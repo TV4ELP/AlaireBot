@@ -9,7 +9,8 @@ const defaults = {
    enabled : true,
    permissions : [
       "admin"
-    ]
+   ],
+   params : 'optional: MessageID for Custom Message'
 };
 
 module.exports.defaults = defaults;
@@ -42,7 +43,7 @@ module.exports.classObj = class createRoleReactions extends BasicCommand{
       //First Create a message/embed we can react to
       let embed = new DiscordJS.MessageEmbed();
       embed.setColor('#62a608');
-      embed.setTitle('React For Roles');
+      embed.setTitle('React for Roles');
       embed.setAuthor('Alaire', 'https://cdn.discordapp.com/avatars/586915769493880842/35e9c9874d02e256c5b702e003688937.png'); //Name, Icon
       embed.setDescription('React to the Role you want to have!');
 
