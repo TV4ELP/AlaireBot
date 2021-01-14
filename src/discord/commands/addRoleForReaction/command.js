@@ -8,7 +8,8 @@ const defaults = {
    enabled : true,
    permissions : [
       "admin"
-    ]
+   ],
+   params : '@Role + Emote from Server (Any the Bot is in, is fine)'
 };
 
 module.exports.defaults = defaults;
@@ -93,7 +94,8 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
 
       //when not exists, make new
       resultObj = reactionDb.get('roleAndEmote').push(assignmentObj).write();
-      this.respond(resultObj[0]); //this time we get an array
+      let index = resultObj.length;
+      this.respond(resultObj[index -1]); //this time we get an array, so just use the last one which is the newest
       return true;
    }
 
