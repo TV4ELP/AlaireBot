@@ -38,7 +38,7 @@ module.exports.classObj = class reactionAddRole extends AddRoleForReaction{
       let roleId = pair.roleId;
 
       //we need to fetch the dumb stupid USer because DIscord JS is dumb and caches shit in dumb ways
-      this.client.guilds.fetch(this.reactionHelper).then( guild => {
+      this.client.guilds.fetch(reactionHelper.guildId).then( guild => {
          guild.members.fetch(this.user.id).then(user => {
             reactionHelper.userGiveRole(roleId, user);
             this.respondGiven(roleId, reactionHelper);

@@ -8,7 +8,8 @@ const defaults = {
    enabled : true,
    permissions : [
       "admin"
-    ]
+   ],
+   params : '@Role or Emote which you want to remove'
 };
 
 module.exports.defaults = defaults;
@@ -39,13 +40,21 @@ module.exports.classObj = class delRoleForReaction extends addRoleForReaction{
 
       //If this pair exists, YEET it out
       if(existing.value() != null){  
-         let uff = reactionDb.get('roleAndEmote').remove({emoteId : emoteId}).write();
-         resultObj.emoteId = emoteId;
+         reactionDb.get('roleAndEmote').remove({emoteId : emoteId}).write();
+         resultObj.emoteId = existingObj.emoteId;
          resultObj.roleId = existingObj.roleId;
          this.respond(resultObj);
          return true;
-      }else{
-         this.respondNothing();
+      }
+
+      //Maybe we need to delete by role
+      existing = reactionDb.get('roleAndEmote').find({roleId : roleId});
+      if(existing.value() != null){
+         reactionDb.get('roleAndEmote').remove({roleId : roleId}).write();
+         resultObj.emoteId = existingObj.emoteId;
+         resultObj.roleId = existingObj.roleId;
+         this.respond(resultObj);
+         return true;
       }
    }
 
