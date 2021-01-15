@@ -57,7 +57,7 @@ module.exports = class reactionHelper extends permissionHelper {
    // This is how a Discord Emote is build <:name:1234567890:>
    //We want only the ID
    getDiscordEmotesFromMessage(messageStr){
-      let emoteIDs = messageStr.match(/(?<=<:.*:)([0-9]*)(?=>)/ig); //lookback <:XXX: match numbers lookahead >
+      let emoteIDs = messageStr.match(/(?<=<.*:.*:)([0-9]*)(?=>)/ig); //lookback <:XXX: match numbers lookahead >
       return emoteIDs;
    }
 

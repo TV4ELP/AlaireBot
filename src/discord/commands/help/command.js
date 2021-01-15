@@ -6,11 +6,12 @@ const defaults = {
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
-   permissions : []
+   permissions : [],
+   params : ''
 };
 
 module.exports.defaults = defaults;
-module.exports.classObj = class addRoleForReaction extends BasicCommand{
+module.exports.classObj = class help extends BasicCommand{
 
    constructor(discord, eventData, user, database, params){
       super(discord, eventData, user, database, params); //call parent
@@ -25,8 +26,14 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
       
       //Gotta need all Commands to Help ya find what you need
       const allCommands = this.discord.GetAllCommands();
-      commands.forEach(value =>{
-         
+      let message = "";
+      allCommands.forEach(value =>{
+         if(!value.defaults.enabled || value.defaults.command == '') {
+            return;
+         }
+         message += value.defaults.command + " - " + value.defaults.params + "\r"; 
       });
+
+      this.event.channel.send(message);
    }
 }

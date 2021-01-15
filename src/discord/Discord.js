@@ -14,6 +14,7 @@ module.exports = class Discord {
       });
       this.RegisterEvents();
       this.StartWatcher();
+      this.storagePath = 'storage/';
    }
 
    StartWatcher(){
@@ -22,7 +23,32 @@ module.exports = class Discord {
    }
 
    Start(){
-      this.client.login(fs.readFileSync('discord.key', 'utf8'))
+      this.client.login(fs.readFileSync('discord.key', 'utf8'));
+      //If we migrated or moved folders around or renamed them, make sure they still work
+      this.UpdatePaths();
+   }
+
+   //Update all Paths for all Guilds, in case something happend between starts
+   UpdatePaths(){
+
+      let dirs = fs.readdirSync(this.storagePath);
+      for(let i = 0; dirs.length > i; i++){
+         let dir = dirs[i];
+         if(!isNaN(dir)){
+            let event = {guild : {id : dir}}; //dummy Object
+            let database = this.GetServerStorage(event, false);
+            let commands = this.GetAllCommands();
+            commands.forEach(value =>{
+               let commandObj = database.get('commands').find({command : value.defaults.command}); //Delete them just to be on the safe side
+               if(commandObj){
+                  commandObj.update('filePath', () => value.defaults.filePath).write();
+               }
+            });
+         }
+      }
+      
+
+      
    }
 
    //Get all Events and then shoot them off to the next step
@@ -44,14 +70,14 @@ module.exports = class Discord {
 
       this.client.on('message', async(message) => {
          if(message.partial) await message.fetch();
-         if(!message.author.bot)
-            if(message.author.partial) await user.fetch();{
+         if(!message.author.bot){
+            if(message.author.partial) await user.fetch();
             let user = message.author;
             this.HandleTextEvent(message, user);
          }
       });
 
-      //Guild join is never partial
+      //Guild join is never partial if it would be, i would be sad
       this.client.on('guildCreate', async(guild) => {
          this.CreateDefaults(guild);
       });
@@ -89,10 +115,17 @@ module.exports = class Discord {
       });
    }
 
+
+   //This never works and kinda spams me... i don't know why and i don't care. I blocked the Bot *shrugs*
    HandleProcessCommandError(errorObj, eventData){
       if(errorObj.message.includes('NOT FOUND')){
          //eventData.reply("Me no knowing what dis means"); 
       }else{
+         if(errorObj.message.author != null){
+            if(errorObj.message.author.bot){
+               return;
+            }
+         }
          eventData.reply("Uhmmm... i'm not feeling so well... i notified a doctor already");
          let cache = this.client.users.cache;
          cache.get('147011778637856768').createDM().then(dmChannel => { //inform me please
@@ -103,10 +136,10 @@ module.exports = class Discord {
 
    CreateDefaults(guild){
       let object = {guild : guild};
-      let database = this.GetServerStorage(object);
+      let database = this.GetServerStorage(object, false);
 
       let guildId = guild.id;
-      let storagePath = 'storage/' + guildId + '/';
+      let storagePath = this.storagePath + guildId + '/';
       let mutedDatabaseFilePath = storagePath + 'muted.json';
 
       //get all commands and fill in
@@ -175,7 +208,7 @@ module.exports = class Discord {
 
    //We need the Database for the Sprcific Server
    //Create if not Found
-   GetServerStorage(event, setup = false){
+   GetServerStorage(event, setup = true){
       let guild = event.guild;
 
       //no guild, no doing stuff

