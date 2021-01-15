@@ -39,15 +39,11 @@ module.exports = class Discord {
             let database = this.GetServerStorage(event, false);
             let commands = this.GetAllCommands();
             commands.forEach(value =>{
-               let commandObj = database.get('commands').find({command : value.defaults.command}); //Delete them just to be on the safe side
-               if(commandObj){
-                  commandObj.update('filePath', () => value.defaults.filePath).write();
-               }
+               database.get('commands').remove({filePath: value.defaults.filePath}).write(); //Delete them just to be on the safe side
+               database.get('commands').push(value.defaults).write();
             });
          }
       }
-      
-
       
    }
 
@@ -102,7 +98,7 @@ module.exports = class Discord {
    }
 
    HandleTextEvent(messageEvent, user){
-      let content = messageEvent.content;
+      let content = messageEvent.content; 
       let serverStorage = this.GetServerStorage(messageEvent);
       this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
          let path = commandObj.filePath + '/command.js';
