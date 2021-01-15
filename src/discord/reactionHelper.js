@@ -3,7 +3,7 @@ const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
 const permissionHelper = require('./permissionHelper');
 module.exports = class reactionHelper extends permissionHelper {
-
+   //test
    constructor(discordClient, guildId, mainDB){
       super(discordClient, guildId, mainDB);
    }
