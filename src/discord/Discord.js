@@ -55,7 +55,6 @@ module.exports = class Discord {
       this.client.on('guildCreate', async(guild) => {
          this.CreateDefaults(guild);
       });
-
    }
 
    HandleReaction(eventData, user, type){

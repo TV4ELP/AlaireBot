@@ -9,11 +9,13 @@ module.exports = class reactionHelper extends permissionHelper {
    }
 
    setupPermissionDBForGuild(){
-      let storageFile = this.storagePath + this.guildId + '/reaction.json';
+      let storageFilePath = this.storagePath + this.guildId + '/reaction.json';
 
-      let reactionDB = low(new FileSync(storageFile));
+      let reactionDB = low(new FileSync(storageFilePath));
       reactionDB.defaults({reaction : [], roleAndEmote : []}).write();
-      this.guildDB.set('reactionDatabasePath', storageFile).write();
+      this.guildDB.set('reactionDatabasePath', storageFilePath).write();
+
+      return storageFilePath;
    }
 
    getEmoteFromString(str){
@@ -68,6 +70,10 @@ module.exports = class reactionHelper extends permissionHelper {
 
    reactionDatabase(){
       let reactionDatabasePath = this.guildDB.get('reactionDatabasePath').value();
+      if(reactionDatabasePath == null){
+         reactionDatabasePath = this.setupPermissionDBForGuild();
+      }
+
       let reactionDatabase = low(new FileSync(reactionDatabasePath));
       return reactionDatabase;
    }
