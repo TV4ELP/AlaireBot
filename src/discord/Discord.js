@@ -73,7 +73,7 @@ module.exports = class Discord {
          database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
       }
 
-      this.CreateDefaults(guild);
+      this.UpdateDefaults(guild);
    }
 
    //Remove all Commands and add the new definitions
@@ -119,6 +119,7 @@ module.exports = class Discord {
       });
    }
 
+   //Handle the reaction based on the command specified in the Database for the ID
    HandleReaction(eventData, user, type){
       let commandName = type == "ADD" ? "addRole.js" : "removeRole.js";
       let message = eventData.message;
@@ -137,11 +138,12 @@ module.exports = class Discord {
       }
    }
 
+   //Dynamically Create and execute a commandclass
    HandleTextEvent(messageEvent, user){
       let content = messageEvent.content; 
-      let serverStorage = this.GetGuildStorage(messageEvent);
-      this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
-         let path = commandObj.filePath + '/command.js';
+      let serverStorage = this.GetGuildStorage(messageEvent); //Get the Databse for the Guild
+      this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => { //try to find a command
+         let path = commandObj.filePath + '/command.js'; 
          let commandClass = new(require(path).classObj)(this, messageEvent, user, serverStorage); //Create a new CommandObject with the Client inserted.
          //Preconfigure Params
          commandClass.getParamsFromMessage(messageEvent, commandObj);
@@ -170,7 +172,8 @@ module.exports = class Discord {
       }
    }
 
-   CreateDefaults(guild){
+   //Update all the necessary info for a guild 
+   UpdateDefaults(guild){
       let object = {guild : guild};
       let database = this.GetGuildStorage(object);
 
