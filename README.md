@@ -44,3 +44,4 @@ Want to develope the online api/website? Look into src/server
 - ~~Default Setup Vars in each command to setup them all at once for a new Server~~
 - Use Default Emotes
 
+wup
