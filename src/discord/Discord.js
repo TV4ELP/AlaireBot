@@ -10,41 +10,78 @@ module.exports = class Discord {
    constructor(db){
       this.mainDB = db;
       this.client = new DiscordJS.Client({
-         partials : ['MESSAGE', 'CHANNEL', 'REACTION', "USER"]         
+         partials : ['MESSAGE', 'CHANNEL', 'REACTION', "USER"],
       });
       this.RegisterEvents();
       this.StartWatcher();
-      this.storagePath = 'storage/';
+      this.storagePath = this.mainDB.get('storagePath').value();
    }
 
+   //Start all watcher that have to check if a certain time/condition has been met 
    StartWatcher(){
       let watcher = new kickWatcher(this.client);
       watcher.watch();
    }
 
+   //Login to the Discord API and make sure we have everything needed to make calls to it
    Start(){
-      this.client.login(fs.readFileSync('discord.key', 'utf8'));
-      //If we migrated or moved folders around or renamed them, make sure they still work
-      this.UpdatePaths();
+      this.client.login(fs.readFileSync('discord.key', 'utf8')).then( () => {
+         //make sure we are actually logged in before we try to do anything
+         console.log("Bot logged in")
+         this.UpdateConfiguration();
+      });
    }
 
-   //Update all Paths for all Guilds, in case something happend between starts
-   UpdatePaths(){
+   //Get all Guilds we are currently in
+   GetAllGuilds(){
+      const guildCollection = this.client.guilds.cache;
+      return guildCollection;
+   }
 
-      let dirs = fs.readdirSync(this.storagePath);
-      for(let i = 0; dirs.length > i; i++){
-         let dir = dirs[i];
-         if(!isNaN(dir)){
-            let event = {guild : {id : dir}}; //dummy Object
-            let database = this.GetServerStorage(event, false);
-            let commands = this.GetAllCommands();
-            commands.forEach(value =>{
-               database.get('commands').remove({filePath: value.defaults.filePath}).write(); //Delete them just to be on the safe side
-               database.get('commands').push(value.defaults).write();
-            });
-         }
+   //Make sure every Guild has all Commands and all Paths are correct
+   UpdateConfiguration(){
+      const guildCollection = this.GetAllGuilds();
+      guildCollection.each((guild) => {
+         //We forcefully cache every guild on the first run of the bot
+         this.client.guilds.fetch(guild.id, true, true).then( (fetchedGuild) => {
+            this.UpdateSingleGuildConfig(fetchedGuild);
+         });
+      });
+   }
+
+   //Update Commands and Files for a Single Guild
+   UpdateSingleGuildConfig(guild){
+      this.UpdateGuildDatabase(guild);
+
+      let event = {guild :  guild}; //dummy Object
+      let database = this.GetGuildStorage(event);
+      let commands = this.GetAllCommands();
+      this.UpdateCommands(database, commands); 
+   }
+
+   //Update the Storage Configs/Databases
+   UpdateGuildDatabase(guild){
+      let storagePath = this.storagePath + guild.id + '/';
+      let storageFile = storagePath + 'config.json';
+
+      //If there is no Folder, create it
+      if(fs.existsSync(storagePath) == false){
+         fs.mkdirSync(storagePath);
+         let database = low(new FileSync(storageFile));
+         //Create the BASE structure
+         //forcedStart, with what charakter the bot executes basic commands
+         database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
       }
-      
+
+      this.CreateDefaults(guild);
+   }
+
+   //Remove all Commands and add the new definitions
+   UpdateCommands(guildDatabase, commandCollection){
+      guildDatabase.get('commands').remove().write()
+      commandCollection.forEach(value =>{
+         guildDatabase.get('commands').push(value.defaults).write();
+      });
    }
 
    //Get all Events and then shoot them off to the next step
@@ -75,14 +112,17 @@ module.exports = class Discord {
 
       //Guild join is never partial if it would be, i would be sad
       this.client.on('guildCreate', async(guild) => {
-         this.CreateDefaults(guild);
+         this.UpdateSingleGuildConfig(guild);
+         //We need to add it manually here, because only available guilds at the start are watched, not new ones
+         let watcher = new kickWatcher(this.client);
+         watcher.watchSingleGuild(guild.id);
       });
    }
 
    HandleReaction(eventData, user, type){
       let commandName = type == "ADD" ? "addRole.js" : "removeRole.js";
       let message = eventData.message;
-      let serverStorage = this.GetServerStorage(message);
+      let serverStorage = this.GetGuildStorage(message);
       let reactionHlp = new reactionHelper(this, message.guild.id, this.mainDB);
       let reaction = reactionHlp.getReactionInDB(message.id);
       if(reaction){
@@ -99,7 +139,7 @@ module.exports = class Discord {
 
    HandleTextEvent(messageEvent, user){
       let content = messageEvent.content; 
-      let serverStorage = this.GetServerStorage(messageEvent);
+      let serverStorage = this.GetGuildStorage(messageEvent);
       this.GetCommandFromMessageContent(content, serverStorage).then(commandObj => {
          let path = commandObj.filePath + '/command.js';
          let commandClass = new(require(path).classObj)(this, messageEvent, user, serverStorage); //Create a new CommandObject with the Client inserted.
@@ -132,18 +172,11 @@ module.exports = class Discord {
 
    CreateDefaults(guild){
       let object = {guild : guild};
-      let database = this.GetServerStorage(object, false);
+      let database = this.GetGuildStorage(object);
 
       let guildId = guild.id;
       let storagePath = this.storagePath + guildId + '/';
       let mutedDatabaseFilePath = storagePath + 'muted.json';
-
-      //get all commands and fill in
-      let commands = this.GetAllCommands();
-      commands.forEach(value =>{
-         database.get('commands').remove({filePath: value.defaults.filePath}).write(); //Delete them just to be on the safe side
-         database.get('commands').push(value.defaults).write();
-      });
 
       let roleManager = guild.roles;
       let roles = roleManager.cache;
@@ -153,13 +186,12 @@ module.exports = class Discord {
       //Database for all Muted Member.
       //currentlymuted = memberId => {timestamp, timeinseconds}
       //mutedCount = memberID => int
-      let mutedDatabse = low(new FileSync(mutedDatabaseFilePath));
-      mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
-      database.set('muteDatabasePath', mutedDatabaseFilePath).write();
+      if(fs.existsSync(mutedDatabaseFilePath) == false){
+         let mutedDatabse = low(new FileSync(mutedDatabaseFilePath));
+         mutedDatabse.defaults({currentlyMuted : [], mutedCount : []}).write();
+      }
       
-      //We need to add it manually here, because only available guilds at the start are watched, not new ones
-      let watcher = new kickWatcher(this.client);
-      watcher.watchSingleGuild(guildId);
+      database.set('muteDatabasePath', mutedDatabaseFilePath).write();
 
       let reactionHlp = new reactionHelper(this.client, guildId, this.mainDB);
       reactionHlp.setupPermissionDBForGuild();
@@ -204,7 +236,7 @@ module.exports = class Discord {
 
    //We need the Database for the Sprcific Server
    //Create if not Found
-   GetServerStorage(event, setup = true){
+   GetGuildStorage(event){
       let guild = event.guild;
 
       //no guild, no doing stuff
@@ -212,22 +244,7 @@ module.exports = class Discord {
          return null;
       }
 
-      let storagePath = 'storage/' + guild.id + '/';
-      let storageFile = storagePath + 'config.json';
-
-      //If no Databse exists we need to create it.
-      if(fs.existsSync(storagePath) == false){
-         fs.mkdirSync(storagePath);
-         let database = low(new FileSync(storageFile));
-         //Create the BASE structure
-         //forcedStart, with what charakter the bot executes basic commands
-         database.defaults({commands : [], owner : guild.ownerID, forcedStart : '/'}).write();
-         //If we are already in the setup, dont't do it again
-         if(setup){
-            this.CreateDefaults(guild);
-         }
-         return database;
-      }
+      let storageFile = 'storage/' + guild.id + '/config.json';
       return low(new FileSync(storageFile));
    }
 

@@ -11,8 +11,10 @@ module.exports = class reactionHelper extends permissionHelper {
    setupPermissionDBForGuild(){
       let storageFilePath = this.storagePath + this.guildId + '/reaction.json';
 
-      let reactionDB = low(new FileSync(storageFilePath));
-      reactionDB.defaults({reaction : [], roleAndEmote : []}).write();
+      if(fs.existsSync(storageFilePath) == false){
+         let reactionDB = low(new FileSync(storageFilePath));
+         reactionDB.defaults({reaction : [], roleAndEmote : []}).write();
+      }
       this.guildDB.set('reactionDatabasePath', storageFilePath).write();
 
       return storageFilePath;

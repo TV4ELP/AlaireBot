@@ -24,12 +24,18 @@ module.exports = class permissionHelper {
       let storageFile = this.storagePath + this.guildId + '/permissions.json';
       //create the DB
       let database = low(new FileSync(storageFile));
-      database.defaults({availablePermissions : [], users : {}, roles : {}}).write(); //User but also roles can have their own permissions
+      if(fs.existsSync(storageFile) == false){
+         database.defaults({availablePermissions : [], users : {}, roles : {}}).write(); //User but also roles can have their own permissions
+      }
 
       //All Permission into the DB please
       let availablePermissionsInDB = database.get('availablePermissions');
       availablePermissions.forEach(element => {
-         availablePermissionsInDB.push(element).write();
+         //But only if they exist
+         let exists = availablePermissionsInDB.value().includes(element);
+         if(exists == false){
+            availablePermissionsInDB.push(element).write();
+         }
       });
       
       this.guildDB.set('permissionDatabasePath', storageFile).write(); 
