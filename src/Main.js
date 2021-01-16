@@ -1,39 +1,44 @@
-const fs = require('fs');;
+//We need filesystem access. Loading this module does that
+const fs = require('fs');
+//Module to treat json files in a database like way
 const low = require('lowdb');
+//We wan't to write and read synchronously to keep things simple
 const FileSync = require('lowdb/adapters/FileSync');
+//Main just sets the envirtoment up, the Discord Class sets the Bot up/starts it
 const Discord = require('./discord/Discord.js');
 
 module.exports = class Main {
    constructor(){
-      //Setup if it is the first Start
-      this.mainDB = (fs.existsSync('.firstStart') == false ? this.Setup() : this.AfterStart() );
+      this.mainDB = this.Setup();
       this.discord = this.GetDiscord();
    }
 
+   //check if all folders/files are where we need em
    Setup(){
-      fs.writeFile('.firstStart', "", () => {
-         (fs.existsSync('./storage') == false ? fs.mkdirSync('./storage') : null);   
-      });
-   
-      console.log('CREATED INITIAL CONFIG');
+      if(fs.existsSync('./storage') == false){
+         fs.mkdirSync('./storage')
+      } 
+      console.log("Folders are setup");
       //We now have our DB, return it. 
-      return this.AfterStart();
-   }
-
-
-   AfterStart(){
       let db = low(new FileSync('storage/main.json'));
-      db.set('storagePath', 'storage/').write();     
+
+      if(db.get('storagePath').value() == null){
+         db.set('storagePath', 'storage/').write();
+      }
+      console.log("Main Database is Setup");
+
       return db;
    }
 
+   //Create the Discord Object with our main Database
    GetDiscord(){
       let discord = new Discord(this.mainDB);
       return discord;
    }
 
-   //Everything Setup, we now only need to Start the Modules
+   //Everything Setup, we now only need to start the bot
    Start(){
       this.discord.Start();
+      console.log("Startup passed, initialising Bot");
    }
 }
