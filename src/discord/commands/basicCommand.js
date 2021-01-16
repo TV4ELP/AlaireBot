@@ -84,6 +84,13 @@ module.exports.classObj = class BasicCommand {
       return guild;
    }
 
+   //does our guild have a channel with that ID? If yes then return the object
+   getChannel(channelId){
+      let guild = this.getGuildFromMessage();
+      let channel = guild.channels.cache.get(channelId);
+      return channel;
+   }
+
    isCommandAllowed(permissions){
       const permissionsHelper = this.getPermissionHelper();
       let allowed = permissionsHelper.isCommandAllowed(permissions, this.event.member);
