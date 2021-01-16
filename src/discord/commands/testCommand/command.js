@@ -6,7 +6,11 @@ const defaults = {
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
-   permissions : [],
+   permissions : [
+      'admin',
+      'mute',
+      'japanese'
+   ],
    params : ''
 };
 
