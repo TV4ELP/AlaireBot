@@ -61,7 +61,7 @@ module.exports.classObj = class BasicCommand {
       return mutedDatabase;
    }
 
-   reactionDatabase(){
+   helperDatabase(){
       let reactionDatabasePath = this.database.get('reactionDatabasePath').value();
       let reactionDatabase = low(new FileSync(reactionDatabasePath));
       return reactionDatabase;
@@ -105,6 +105,11 @@ module.exports.classObj = class BasicCommand {
    getReactionHelper(){
       const reactionHelperObject = new reactionHelper(this.client, this.getGuildFromMessage().id, this.mainDB);
       return reactionHelperObject;
+   }
+
+   getRolesHelper(){
+      const roleHelperObject = new roleHelper(this.client, this.getGuildFromMessage().id, this.mainDB);
+      return roleHelperObject;
    }
 
    //Get all parameter from a message

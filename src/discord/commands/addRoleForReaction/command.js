@@ -46,7 +46,7 @@ module.exports.classObj = class addRoleForReaction extends BasicCommand{
          return;
       }
 
-      let reactionDb = this.reactionDatabase();
+      let reactionDb = this.helperDatabase();
 
       this.updateDatabase(emoteId, reactionDb, roleId);
       

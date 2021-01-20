@@ -8,7 +8,7 @@ module.exports = class reactionHelper extends permissionHelper {
       super(discordClient, guildId, mainDB);
    }
 
-   setupPermissionDBForGuild(){
+   setupDBForGuild(){
       let storageFilePath = this.storagePath + this.guildId + '/reaction.json';
 
       if(fs.existsSync(storageFilePath) == false){
@@ -42,7 +42,7 @@ module.exports = class reactionHelper extends permissionHelper {
 
    //We need to register the Message ID so we can check on which Reaction was Reacted on, and if we want to do anything with it
    registerReactionMessage(discordMessageId, commandDefaults){
-      let reactionDb = this.reactionDatabase();
+      let reactionDb = this.helperDatabase();
       const dir = commandDefaults.filePath;
       const reactionObj = {discordMessageId, dir};
       reactionDb.get('reaction').push(reactionObj).write();
@@ -50,7 +50,7 @@ module.exports = class reactionHelper extends permissionHelper {
 
    //Get ReactionMessage from ID
    getReactionInDB(discordMessageId){
-      let reactionDb = this.reactionDatabase();
+      let reactionDb = this.helperDatabase();
       let messageReaction = reactionDb.get('reaction').find({discordMessageId : discordMessageId}).value();
 
       return messageReaction;
@@ -65,15 +65,15 @@ module.exports = class reactionHelper extends permissionHelper {
 
    //Return all Pairs as array   [{emoteId,roleId}, {emoteId,roleId} ...]
    getAllPairs(){
-      let reactionDb = this.reactionDatabase();
+      let reactionDb = this.helperDatabase();
       let pairs = reactionDb.get('roleAndEmote').value();
       return pairs;
    }
 
-   reactionDatabase(){
+   helperDatabase(){
       let reactionDatabasePath = this.guildDB.get('reactionDatabasePath').value();
       if(reactionDatabasePath == null){
-         reactionDatabasePath = this.setupPermissionDBForGuild();
+         reactionDatabasePath = this.setupDBForGuild();
       }
 
       let reactionDatabase = low(new FileSync(reactionDatabasePath));

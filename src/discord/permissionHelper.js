@@ -11,7 +11,7 @@ module.exports = class permissionHelper {
       this.storagePath = this.getStoragePath();
    }
 
-   setupPermissionDBForGuild(){
+   setupDBForGuild(){
       //First get all available permission from commands
       let availablePermissions = this.guildDB.get('commands').map('permissions')
          .flatten() //make flat list

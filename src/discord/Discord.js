@@ -4,6 +4,7 @@ const DiscordJS = require('discord.js');
 const fs = require('fs');
 const permissionHelper = require('./permissionHelper');
 const reactionHelper = require('./reactionHelper');
+const roleHelper = require('./roleHelper');
 const kickWatcher = require('./watcher/kickWatcher');
 
 module.exports = class Discord {
@@ -197,10 +198,14 @@ module.exports = class Discord {
       database.set('muteDatabasePath', mutedDatabaseFilePath).write();
 
       let reactionHlp = new reactionHelper(this.client, guildId, this.mainDB);
-      reactionHlp.setupPermissionDBForGuild();
+      reactionHlp.setupDBForGuild();
 
       let permissionHelperObj = new permissionHelper(this.client, guildId, this.mainDB);
-      permissionHelperObj.setupPermissionDBForGuild();
+      permissionHelperObj.setupDBForGuild();
+
+      let roleHelperObj = new roleHelper(this.client, guildId, this.mainDB);
+      roleHelperObj.setupDBForGuild();
+      
    }
 
    CreateMuteRole(roleManager, database){

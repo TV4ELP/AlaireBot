@@ -26,7 +26,7 @@ module.exports.classObj = class reactionAddRole extends AddRoleForReaction{
 
       let emoteId = this.params.emote.id;
       let reactionHelper = this.getReactionHelper();
-      let reactionDb = this.reactionDatabase();
+      let reactionDb = this.helperDatabase();
       
       let existing = reactionDb.get('roleAndEmote').find({emoteId : emoteId});
       if(existing.value() == null){
@@ -38,6 +38,7 @@ module.exports.classObj = class reactionAddRole extends AddRoleForReaction{
       let roleId = pair.roleId;
 
       //we need to fetch the dumb stupid USer because DIscord JS is dumb and caches shit in dumb ways
+      //TODO, check for groups with the fancy schmanzy role helper
       this.client.guilds.fetch(reactionHelper.guildId).then( guild => {
          guild.members.fetch(this.user.id).then(user => {
             reactionHelper.userGiveRole(roleId, user);
