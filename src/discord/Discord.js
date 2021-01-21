@@ -26,7 +26,7 @@ module.exports = class Discord {
 
    //Login to the Discord API and make sure we have everything needed to make calls to it
    Start(){
-      this.client.login(fs.readFileSync('discord.key', 'utf8')).then( () => {
+      this.client.login(fs.readFileSync('discord.key', 'utf8').trim()).then( () => {
          //make sure we are actually logged in before we try to do anything
          console.log("Bot logged in")
          this.UpdateConfiguration();
