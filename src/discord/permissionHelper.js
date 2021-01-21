@@ -31,9 +31,9 @@ module.exports = class permissionHelper {
       //All Permission into the DB please
       let availablePermissionsInDB = database.get('availablePermissions');
       availablePermissions.forEach(element => {
-         //But only if they exist
-         let exists = availablePermissionsInDB.value().includes(element);
-         if(exists == false){
+         //But only if they exist ? as nullsafeOperator should we start fresh
+         let exists = availablePermissionsInDB.value()?.includes(element);
+         if(!exists){
             availablePermissionsInDB.push(element).write();
          }
       });
