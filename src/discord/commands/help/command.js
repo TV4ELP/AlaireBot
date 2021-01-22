@@ -60,7 +60,7 @@ module.exports.classObj = class help extends BasicCommand{
          }
 
          if(permissionArray.length > 0){
-            commandName += " Permissions: " + permissionArray.toString(); 
+            commandName += " (Needed Permissions: " + permissionArray.toString() + ")"; 
          }
 
          embed.addField(commandName, params, false); //Title, Content, Inline 
