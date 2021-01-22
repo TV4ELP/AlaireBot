@@ -92,6 +92,9 @@ module.exports.classObj = class createRoleReactions extends BasicCommand{
    //First Number is Guild ID|| Second Number is Channel ID || Third Number is Message ID
    getMessageFromLink(){
       let message = false;
+      if(this.params == null || this.params.length == 0){
+         return;
+      }
       this.params.forEach(element => {
          //get the last charackter from an argument
          let url = new URL(element);
