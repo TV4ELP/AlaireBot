@@ -2,6 +2,7 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const permissionHelper = require('../permissionHelper');
 const reactionHelper = require('../reactionHelper');
+const roleHelper = require('../roleHelper');
 
 //Defaults get loadded into the Databse on first run. Currently can't be edited from outside the code
 const defaults = {
@@ -132,6 +133,13 @@ module.exports.classObj = class BasicCommand {
    //If we need Custom Params for like a reaction
    setCustomParams(paramsObj){
       this.params = paramsObj;
+   }
+
+   replyBad(text){
+      if(text == null){
+         return;
+      }
+      this.event.reply(text);
    }
 
 }

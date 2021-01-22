@@ -30,4 +30,20 @@ module.exports = class roleHelper extends permissionHelper {
       let roleDatabase = low(new FileSync(roleDatabasePath));
       return roleDatabase;
    }
+
+   //Create a new Named Group. 
+   //Returns true on create.
+   //Returns false if it already exists 
+   createNewGroup(name){
+      let database = this.helperDatabase().get('roleGroup');
+      let existing = database.find({groupName : name}).value();
+      //we already have it, lets go
+      if(existing){
+         return false;
+      }
+
+      //Set the empty group
+      database.push({groupName : name, roles : []}).write();
+      return true;
+   }
 }

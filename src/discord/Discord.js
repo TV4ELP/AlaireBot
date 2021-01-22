@@ -265,8 +265,12 @@ module.exports = class Discord {
       commandsFolder.forEach((value, key) => {
          let newPath = path + value;
          if(fs.lstatSync(newPath).isDirectory()){
-            let obj = require('./commands/' + value + '/command.js');
-            defaults.push(obj);
+            let requirePath = './commands/' + value + '/command.js';
+            if(fs.existsSync(path + value + "/command.js")){
+               let obj = require(requirePath);
+               defaults.push(obj);
+            }
+            
          }
       });
       return defaults;
