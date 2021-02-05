@@ -41,9 +41,59 @@ module.exports = class roleHelper extends permissionHelper {
       if(existing){
          return false;
       }
-
       //Set the empty group
-      database.push({groupName : name, roles : []}).write();
+      database.push({groupName : name, mainRoles : [], subRoles : []}).write();
       return true;
+   }
+
+   //Update the Master Roles
+   //Return resulting Role Id Array on completion
+   //Returns false if no group is present
+   updateMainRoles(name, rolesCollection){
+      let database = this.helperDatabase().get('roleGroup');
+      let existing = database.find({groupName : name});
+      if(existing.value() == null){
+         return false
+      }
+
+      existing.get('mainRoles').remove( () => {return true}).write();
+      rolesCollection.each( role => {
+            existing.get('mainRoles').push(role.id).write();
+      });
+
+      return existing.get('mainRoles').value();
+   }
+
+   //Update the Sub Roles
+   //Return resulting Role Id Array on completion
+   //Returns false if no group is present
+   updateSubRoles(name, rolesCollection){
+      let database = this.helperDatabase().get('roleGroup');
+      let existing = database.find({groupName : name});
+      if(existing.value() == null){
+         return false
+      }
+
+      existing.get('subRoles').remove( () => {return true}).write();
+      rolesCollection.each( role => {
+            existing.get('subRoles').push(role.id).write();
+      });
+
+      return existing.get('subRoles').value();
+   }
+
+
+   //
+   //Returns an Array of all SubRoles where a mainRole is = input 
+   //Returns empty array if nothing is found
+   findAdditionalRolesInGroups(roleId){
+      let database = this.helperDatabase().get('roleGroup');
+      let existing = database.filter( x => {
+         if(x.subRoles.includes(roleId)){
+            return true;
+         }
+      }).value();
+
+      return existing;
    }
 }

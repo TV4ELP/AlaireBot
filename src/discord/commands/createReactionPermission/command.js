@@ -41,6 +41,9 @@ module.exports.classObj = class createRoleReactions extends BasicCommand{
       this.event.channel.send(message).then(discordMessage => {
          reactionHelper.registerReactionMessage(discordMessage.id, defaults);
          this.addDefaultReactions(pairs, discordMessage, reactionHelper);
+         this.event.delete({timeout: 0, reason : "Delete Command used to spawn respawns from bot"}).catch(reason => {
+            console.log(reason);
+         });
       });
    }
 

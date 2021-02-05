@@ -11,6 +11,14 @@ module.exports = class permissionHelper {
       this.storagePath = this.getStoragePath();
    }
 
+   getRoleHelper(){
+      if(this.roleHelper == null){
+         const roleHelper = require('./roleHelper');
+         this.roleHelper = new roleHelper(this.discordClient, this.guildId, this.mainDB);
+      }
+      return this.roleHelper;
+   }
+
    setupDBForGuild(){
       //First get all available permission from commands
       let availablePermissions = this.guildDB.get('commands').map('permissions')
@@ -81,14 +89,47 @@ module.exports = class permissionHelper {
    }
 
    //Give a User a Role
+   //If applicable check for any roleGroups
    userGiveRole(roleId, user){
       let userRoleManager = user.roles;
+      let additionalRoles = this.getRoleHelper().findAdditionalRolesInGroups(roleId);
+      //now we have all RoleGroup Objects of the roles.json which have the roleID as a subRole
+      additionalRoles.forEach(roleObject => {
+         //Find all mainRoles and assign them
+         let mainRoles = roleObject.mainRoles;
+         mainRoles.forEach(mainRoleId => {
+            userRoleManager.add(mainRoleId);
+         });
+      });
+
       userRoleManager.add(roleId);
    }
 
    //Remove a Role from a User
+   //If applicable check for any roleGroups
    userDelRole(roleId, user){
       let userRoleManager = user.roles;
+      let roleCache = userRoleManager.cache;
+      let additionalRoles = this.getRoleHelper().findAdditionalRolesInGroups(roleId);
+      //check if we have enough roles to stay in this group
+      additionalRoles.forEach(roleObject => {
+         let subRoles = roleObject.subRoles;
+         let groupStillValid = false;
+         subRoles.forEach(subRoleId => {
+            if(roleCache.has(subRoleId)){
+               groupStillValid = true;
+            }
+         });
+
+         //Group is not Valid. We need to all main roles it
+         if(groupStillValid == false){
+            let mainRoles = roleObject.mainRoles;
+            mainRoles.forEach(mainRoleId => {
+               userRoleManager.remove(mainRoleId);
+            });
+         }
+      });
+
       userRoleManager.remove(roleId);
    }
 

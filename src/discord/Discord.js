@@ -26,6 +26,45 @@ module.exports = class Discord {
 
    //Login to the Discord API and make sure we have everything needed to make calls to it
    Start(){
+      //Slash Command Example. Maybe wait for an official implementation
+      /* this.client.on('ready', () => {
+         this.client.api.applications(this.client.user.id).guilds('366942872219549697').commands.post({
+             data: {
+                 name: "hello",
+                 description: "hello world command",
+                 // possible options here e.g. options: [{...}]
+                 "options": [
+                  {
+                      "name": "animal",
+                      "description": "The type of animal",
+                      "type": 3,
+                      "required": true,
+                      "choices": [
+                          {
+                              "name": "Dog",
+                              "value": "animal_dog"
+                          },
+                          {
+                              "name": "Cat",
+                              "value": "animal_cat"
+                          },
+                          {
+                              "name": "Penguin",
+                              "value": "animal_penguin"
+                          }
+                      ]
+                  },
+                  {
+                      "name": "only_smol",
+                      "description": "Whether to show only baby animals",
+                      "type": 5,
+                      "required": false
+                  }
+              ]
+             }
+         });
+     }); */
+
       this.client.login(fs.readFileSync('discord.key', 'utf8').trim()).then( () => {
          //make sure we are actually logged in before we try to do anything
          console.log("Bot logged in")

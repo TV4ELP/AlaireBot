@@ -1,7 +1,7 @@
 const BasicCommand = require('../basicCommand.js').classObj;
 
 const defaults = {
-   command : "/createRoleGroup",
+   command : "/create Role Group",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
