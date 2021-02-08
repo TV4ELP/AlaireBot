@@ -5,6 +5,7 @@ const defaults = {
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
+   global : true,
    permissions : [],
    params : '/list create new listName (can\'t contain spaces)'
 };
@@ -17,12 +18,6 @@ module.exports.classObj = class createNewList extends BasicCommand{
    }
 
    execute(){
-      //no doing shit if we aren't even allowed to
-      if(this.isCommandAllowed(defaults.permissions) == false){
-         this.event.channel.send('You dont have the Permissions needed')
-         return false;
-      }
-
       let name = this.params[0];
       if(name != null){
          let listsHelper = this.getListsHelper();

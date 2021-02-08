@@ -33,6 +33,10 @@ module.exports = class Main {
          db.set('storagePath', 'storage/').write();
       }
 
+      if(db.get('globalCommands').value() == null){
+         db.set('globalCommands', []).write();
+      }      
+
       if(db.get('listsStoragePath').value() == null){
          db.set('listsStoragePath', 'storage/lists/').write();
       }

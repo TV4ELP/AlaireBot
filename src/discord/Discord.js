@@ -119,7 +119,12 @@ module.exports = class Discord {
    //Remove all Commands and add the new definitions
    UpdateCommands(guildDatabase, commandCollection){
       guildDatabase.get('commands').remove().write()
+      this.mainDB.get('globalCommands').remove().write()
       commandCollection.forEach(value =>{
+         //Skip global Commands
+         if(value.defaults.global == true){
+            this.mainDB.get('globalCommands').push(value.defaults).write();
+         }
          guildDatabase.get('commands').push(value.defaults).write();
       });
    }
@@ -261,10 +266,16 @@ module.exports = class Discord {
 
    //Returns a Promise with the command or Error
    //TODO check for forcedstart
+   //TODO global Commands that one can use without a guild
    GetCommandFromMessageContent(contentString, serverStorage){
       let commandPromise = new Promise((resolve, reject) => {
          let contenStringUP = contentString.toUpperCase();
-         let commands = serverStorage.get('commands').value();
+         let commands = [];
+         let guildCommands = serverStorage?.get('commands').value();
+         if(guildCommands != null){
+            commands = commands.concat(guildCommands);
+         }
+         commands = commands.concat(this.mainDB.get('globalCommands').value());
          for(let i in commands){
                let name = commands[i].command.toUpperCase();
                let enabled = commands[i].enabled;
@@ -272,7 +283,7 @@ module.exports = class Discord {
                   resolve(commands[i]);
                }
          }
-
+         
          let exceptionObj = {
             message : 'COMMAND NOT FOUND:' + contentString
          };

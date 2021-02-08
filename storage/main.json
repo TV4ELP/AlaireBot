@@ -1,4 +1,15 @@
 {
   "storagePath": "storage/",
-  "listsStoragePath": "storage/lists/"
+  "listsStoragePath": "storage/lists/",
+  "globalCommands": [
+    {
+      "command": "/list create new",
+      "filePath": "c:\\Users\\TeeFau\\Desktop\\AlaireBot\\src\\discord\\commands\\createNewList",
+      "forcedStart": true,
+      "enabled": true,
+      "global": true,
+      "permissions": [],
+      "params": "/list create new listName (can't contain spaces)"
+    }
+  ]
 }
