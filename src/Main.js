@@ -18,12 +18,23 @@ module.exports = class Main {
       if(fs.existsSync('./storage') == false){
          fs.mkdirSync('./storage')
       } 
-      console.log("Folders are setup");
+      console.log("Storage Folder is setup");
+
+      //Lists are not associated with any guilds. They are with members
+      if(fs.existsSync('./storage/lists') == false){
+         fs.mkdirSync('./storage/lists')
+      } 
+      console.log("List Folder is setup");
+
       //We now have our DB, return it. 
       let db = low(new FileSync('storage/main.json'));
 
       if(db.get('storagePath').value() == null){
          db.set('storagePath', 'storage/').write();
+      }
+
+      if(db.get('listsStoragePath').value() == null){
+         db.set('listsStoragePath', 'storage/lists/').write();
       }
       console.log("Main Database is Setup");
 

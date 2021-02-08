@@ -3,6 +3,7 @@ const FileSync = require('lowdb/adapters/FileSync');
 const permissionHelper = require('../permissionHelper');
 const reactionHelper = require('../reactionHelper');
 const roleHelper = require('../roleHelper');
+const listHelper = require('../listHelper');
 
 //Defaults get loadded into the Databse on first run. Currently can't be edited from outside the code
 const defaults = {
@@ -111,6 +112,11 @@ module.exports.classObj = class BasicCommand {
    getRolesHelper(){
       const roleHelperObject = new roleHelper(this.client, this.getGuildFromMessage().id, this.mainDB);
       return roleHelperObject;
+   }
+
+   getListsHelper(){
+      const listsHelper = new listHelper(this.client, this.mainDB);
+      return listsHelper;
    }
 
    //Get all parameter from a message
