@@ -40,6 +40,9 @@ module.exports = class listHelper {
    }
 
    getDatabaseByname(name, user){
+      if(name == null){
+         name = "default";
+      }
       return this.internalGetDatabase(name, user, false);
    }
 

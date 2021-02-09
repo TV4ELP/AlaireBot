@@ -3,13 +3,22 @@
   "listsStoragePath": "storage/lists/",
   "globalCommands": [
     {
+      "command": "/list add",
+      "filePath": "c:\\Users\\TeeFau\\Desktop\\AlaireBot\\src\\discord\\commands\\addToList",
+      "forcedStart": true,
+      "enabled": true,
+      "global": true,
+      "permissions": [],
+      "params": "/list add name** URL (Omit URL if direct Upload) **Without a name it goes to the Default list"
+    },
+    {
       "command": "/list create new",
       "filePath": "c:\\Users\\TeeFau\\Desktop\\AlaireBot\\src\\discord\\commands\\createNewList",
       "forcedStart": true,
       "enabled": true,
       "global": true,
       "permissions": [],
-      "params": "/list create new listName (can't contain spaces)"
+      "params": "/list create new listName** (can't contain spaces) **optional"
     }
   ]
 }

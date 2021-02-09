@@ -265,8 +265,6 @@ module.exports = class Discord {
    }
 
    //Returns a Promise with the command or Error
-   //TODO check for forcedstart
-   //TODO global Commands that one can use without a guild
    GetCommandFromMessageContent(contentString, serverStorage){
       let commandPromise = new Promise((resolve, reject) => {
          let contenStringUP = contentString.toUpperCase();

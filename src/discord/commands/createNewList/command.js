@@ -7,7 +7,7 @@ const defaults = {
    enabled : true,
    global : true,
    permissions : [],
-   params : '/list create new listName (can\'t contain spaces)'
+   params : '/list create new listName** (can\'t contain spaces) **optional'
 };
 
 module.exports.defaults = defaults;
@@ -18,9 +18,14 @@ module.exports.classObj = class createNewList extends BasicCommand{
    }
 
    execute(){
-      let name = this.params[0];
+      let name = null;
+      if(this.params != null){
+         name = this.params[0];
+      }
+      
+      let listsHelper = this.getListsHelper();
+      
       if(name != null){
-         let listsHelper = this.getListsHelper();
          let result = listsHelper.createDatabaseByname(name, this.user)
          if(result){
             this.event.channel.send('Create new empty List: ' + name);
@@ -30,6 +35,9 @@ module.exports.classObj = class createNewList extends BasicCommand{
          //In any case, we are done here
          return;
       }
-      this.replyBad('You didn\'t gave me a name for the List');
+
+      //Create a default List that we can use for when no name is specified
+      listsHelper.createDatabaseByname("default", this.user);
+      this.replyBad('You didn\'t gave me a name, no name equals default list. Usefull for quickly adding pictures');
    }
 }
