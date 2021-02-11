@@ -6,6 +6,7 @@ const permissionHelper = require('./permissionHelper');
 const reactionHelper = require('./reactionHelper');
 const roleHelper = require('./roleHelper');
 const kickWatcher = require('./watcher/kickWatcher');
+const listHelper = require('./listHelper');
 
 module.exports = class Discord {
    constructor(db){
@@ -27,43 +28,153 @@ module.exports = class Discord {
    //Login to the Discord API and make sure we have everything needed to make calls to it
    Start(){
       //Slash Command Example. Maybe wait for an official implementation
-      /* this.client.on('ready', () => {
+      this.client.on('ready', () => {
          this.client.api.applications(this.client.user.id).guilds('366942872219549697').commands.post({
-             data: {
-                 name: "hello",
-                 description: "hello world command",
-                 // possible options here e.g. options: [{...}]
-                 "options": [
+            data: {
+               name: "list",
+               description: "All the lists",
+               // possible options here e.g. options: [{...}]
+               options: [
                   {
-                      "name": "animal",
-                      "description": "The type of animal",
-                      "type": 3,
-                      "required": true,
-                      "choices": [
-                          {
-                              "name": "Dog",
-                              "value": "animal_dog"
-                          },
-                          {
-                              "name": "Cat",
-                              "value": "animal_cat"
-                          },
-                          {
-                              "name": "Penguin",
-                              "value": "animal_penguin"
-                          }
-                      ]
+                     name: "get",
+                     description: "We want something back",
+                     type: 2, //subgroup
+                     options: [
+                        {
+                           name : "random",
+                           description : "it could be anything",
+                           type : 1,//subcommand
+                           options : [
+                              {
+                                 name : "ListName",
+                                 description : "What List shal it be from (empty for default)",
+                                 type : 3, //string
+                                 required : false
+                              }
+                           ] 
+                        },
+                        {
+                           name : "by-name",
+                           description : "you know what you are searching for",
+                           type : 1,
+                           options : [
+                              {
+                                 name : "ImageName",
+                                 description : "How is it's precious name?",
+                                 type : 3,
+                                 required: true
+                                 
+                              },
+                              {
+                                 name : "ListName",
+                                 description : "What List shal it be from (empty for default)",
+                                 type : 3,
+                                 required : false
+                              }
+                           ]
+                        }
+                     ]
                   },
                   {
-                      "name": "only_smol",
-                      "description": "Whether to show only baby animals",
-                      "type": 5,
-                      "required": false
+                     name: "add",
+                     description: "Pls full me up~",
+                     type :1, 
+                     options:[
+                        {
+                           name : "URL",
+                           description : "The Image Link Please",
+                           type : 3, //string
+                           required : true
+                        },
+                        {
+                           name : "ImageName",
+                           description : "A name to find it better in the future?",
+                           type : 3, //string
+                           required : false
+                        },
+                        {
+                           name : "ListName",
+                           description : "What List shal it be from (empty for default)",
+                           type : 3, //string
+                           required : false
+                        }
+                     ]
                   }
-              ]
-             }
+               ]
+            }
          });
-     }); */
+     });
+
+      this.client.ws.on('INTERACTION_CREATE', async interaction => {
+         const command = interaction.data.name.toLowerCase();
+         const args = interaction.data.options;
+         const channelId = interaction.channel_id;
+         const userId = interaction.member.user.id;
+
+         if (command === 'list'){ 
+            if(args.length > 0){
+               //Now Check if we wanna get or add
+               let getAdd = args[0];
+               if(getAdd.name === 'get'){
+                  let getOptions = getAdd.options;
+                  let nameOrRandom = getOptions[0];
+                  if(nameOrRandom.name === 'random'){
+                     //Do we have a list Name?
+                     if(!nameOrRandom.options){
+                        let listsHelper = new listHelper(this.client, this.mainDB);
+                        let user = this.client.users.fetch(userId).then(user => {
+                           let imageDb = listsHelper.getDatabaseByname(null, user);
+                           let images = imageDb.get('images').value();
+                           let singleUrl = images[Math.floor(Math.random() * images.length)];
+                           let channel = this.client.channels.cache.get(channelId);
+                           channel.send(singleUrl);
+                        });
+
+                        
+                     }else{
+                        //TODO RETURN BY LISTNAME
+                     }
+                     return; //Always end and avoid useless checks
+                  }
+                  if(nameOrRandom.name === 'by-name'){
+                     return; //Always end and avoid useless checks
+                  }
+                  
+               }
+
+               if(getAdd.name === 'add'){
+                  let addOptions = getAdd.options;
+                  let listName = null;
+                  let url = null;
+                  let imageName = null;
+                  addOptions.forEach(element => {
+                     if(element.name === 'url'){
+                        url = element.value;
+                     }
+
+                     if(element.name === 'imagename'){
+                        imageName = element.value;
+                     }
+
+                     if(element.name === 'listName'){
+                        listName = element.value;
+                     }
+                  });
+                  
+                  let listsHelper = new listHelper(this.client, this.mainDB);
+                  let user = this.client.users.cache.get(userId);
+
+                  if(listName){
+                     listsHelper.createDatabaseByname(listName, user); //Create It
+                  }
+
+                  //It will use default if it doesn't have a name
+                  let imageDb = listsHelper.getDatabaseByname(listName, user);
+                  return;//Always end and avoid useless checks
+               }
+            }
+         }
+      });
 
       this.client.login(fs.readFileSync('discord.key', 'utf8').trim()).then( () => {
          //make sure we are actually logged in before we try to do anything

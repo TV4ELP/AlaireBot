@@ -17,6 +17,7 @@ module.exports = class listHelper {
    //Input String Name / User ID / Weather you want to create or not
    //
    internalGetDatabase(name , user, create = true){
+      name = name.toLowerCase();
       const id = user.id;
       const userStorage = this.storagePath + id;
       const userListPath = userStorage + "/" + name + ".json";
