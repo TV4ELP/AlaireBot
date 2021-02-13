@@ -4,7 +4,7 @@ const defaults = {
    command : "/list create new",
    filePath : __dirname,
    forcedStart : true,
-   enabled : true,
+   enabled : false,
    global : true,
    permissions : [],
    params : '/list create new listName** (can\'t contain spaces) **optional'

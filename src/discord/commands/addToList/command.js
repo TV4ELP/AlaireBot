@@ -4,7 +4,7 @@ const defaults = {
    command : "/list add",
    filePath : __dirname,
    forcedStart : true,
-   enabled : true,
+   enabled : false,
    global : true,
    permissions : [],
    params : '/list add name** URL (Omit URL if direct Upload) **Without a name it goes to the Default list'
