@@ -99,6 +99,31 @@ module.exports = class Discord {
                            required : false
                         }
                      ]
+                  },
+                  {
+                     name: "show",
+                     description: "Show what you got",
+                     type: 2, //subgroup
+                     options: [
+                        {
+                           name : "lists",
+                           description : "what lists do you have",
+                           type : 1,//subcommand
+                        },
+                        {
+                           name : "images",
+                           description : "a whole dump for ya",
+                           type : 1,
+                           options : [
+                              {
+                                 name : "ListName",
+                                 description : "What List shal it be from (empty for default)",
+                                 type : 3,
+                                 required : false
+                              }
+                           ]
+                        }
+                     ]
                   }
                ]
             }
@@ -108,10 +133,12 @@ module.exports = class Discord {
       this.client.ws.on('INTERACTION_CREATE', async interaction => {
          const command = interaction.data.name.toLowerCase();
          const args = interaction.data.options;
-         const channelId = interaction.channel_id;
          const userId = interaction.member.user.id;
+         const channel = this.client.channels.cache.get(interaction.channel_id);
+
 
          if (command === 'list'){ 
+            let listsHelper = new listHelper(this.client, this.mainDB);
             if(args.length > 0){
                //Now Check if we wanna get or add
                let getAdd = args[0];
@@ -121,25 +148,49 @@ module.exports = class Discord {
                   if(nameOrRandom.name === 'random'){
                      //Do we have a list Name?
                      if(!nameOrRandom.options){
-                        let listsHelper = new listHelper(this.client, this.mainDB);
-                        let user = this.client.users.fetch(userId).then(user => {
-                           let imageDb = listsHelper.getDatabaseByname(null, user);
-                           let images = imageDb.get('images').value();
-                           let singleUrl = images[Math.floor(Math.random() * images.length)];
-                           let channel = this.client.channels.cache.get(channelId);
-                           channel.send(singleUrl);
+                        this.client.users.fetch(userId).then(user => {
+                           let image = listsHelper.getRandomImage(user);
+                           if(image != listsHelper.ERROR_NO_DB){
+                              channel.send(image.url);
+                           }
                         });
 
                         
                      }else{
-                        //TODO RETURN BY LISTNAME
+                        let dbName = nameOrRandom.options[0].value;
+                        this.client.users.fetch(userId).then(user => {
+                           let image = listsHelper.getRandomImage(user, dbName);
+                           if(image != listsHelper.ERROR_NO_DB){
+                              channel.send(image.url);
+                           }
+                        });
                      }
                      return; //Always end and avoid useless checks
                   }
                   if(nameOrRandom.name === 'by-name'){
-                     return; //Always end and avoid useless checks
+                     let imageName = null;
+                     let listName = null;
+
+                     let getOptions = nameOrRandom.options;
+                     getOptions.forEach(element => {   
+                        if(element.name === 'imagename'){
+                           imageName = element.value;
+                        }
+   
+                        if(element.name === 'listname'){
+                           listName = element.value;
+                        }
+                     });
+                     this.client.users.fetch(userId).then(user => {
+                        let image = listsHelper.getRandomImage(user, listName);
+                        if(image == listsHelper.ERROR_NO_IMAGE_WITH_NAME){
+                           channel.send("I couldn't find what you are looking for");
+                           return;
+                        }
+
+                        channel.send(image.url);
+                     });
                   }
-                  
                }
 
                if(getAdd.name === 'add'){
@@ -156,21 +207,53 @@ module.exports = class Discord {
                         imageName = element.value;
                      }
 
-                     if(element.name === 'listName'){
+                     if(element.name === 'listname'){
                         listName = element.value;
                      }
                   });
                   
-                  let listsHelper = new listHelper(this.client, this.mainDB);
-                  let user = this.client.users.cache.get(userId);
+                  this.client.users.fetch(userId).then(user => {
+                     let result = listsHelper.addImageToDatabase(user, listName, url, imageName);
+   
+                     switch (result) {
+                        case listHelper.ERROR_NO_DB:
+                           channel.send("Couldn't find a list with that name");
+                           break;
+                        case listHelper.ERROR_INVALID_URL:
+                           channel.send("That was not a valid URL");
+                           break;
+                     
+                        default:
+                           return; //Everything is fine. Go home
+                     }
+                  });                  
+               }
 
-                  if(listName){
-                     listsHelper.createDatabaseByname(listName, user); //Create It
+               if(getAdd.name === 'show'){
+                  let showOptions = getAdd.options;
+                  let listOrImages = showOptions[0];
+                  if(listOrImages.name === 'lists'){
+
+                     this.client.users.fetch(userId).then(user => {
+                        let lists = listsHelper.gatAllLists(user);
+                        channel.send(lists);
+                     });
+                     return; //Always end and avoid useless checks
                   }
 
-                  //It will use default if it doesn't have a name
-                  let imageDb = listsHelper.getDatabaseByname(listName, user);
-                  return;//Always end and avoid useless checks
+                  if(listOrImages.name === 'images'){
+                     let dbName = "default";
+
+                     if(listOrImages.options){
+                        dbName = listOrImages.options[0].value;
+                     }
+
+                     this.client.users.fetch(userId).then(user => {
+                        let imagesString = listsHelper.getAllImages(user, dbName);
+                        channel.send(imagesString, {split : true});
+                     });
+                     return; //Always end and avoid useless checks
+                  }
                }
             }
          }
