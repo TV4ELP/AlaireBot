@@ -224,6 +224,7 @@ module.exports = class Discord {
                            break;
                      
                         default:
+                           channel.send("Added");
                            return; //Everything is fine. Go home
                      }
                   });                  
