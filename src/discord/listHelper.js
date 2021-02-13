@@ -158,7 +158,7 @@ module.exports = class listHelper {
       }
 
       entries.forEach(element => {
-         string += element.name + " Image Count:" + element.count + "\n";
+         string += element.name + " :Image Count:" + element.count + "\n";
       });
 
       return string;

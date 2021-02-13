@@ -136,6 +136,10 @@ module.exports = class Discord {
          const userId = interaction.member.user.id;
          const channel = this.client.channels.cache.get(interaction.channel_id);
 
+         this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+            type: 3,
+            }
+         });
 
          if (command === 'list'){ 
             let listsHelper = new listHelper(this.client, this.mainDB);
@@ -251,7 +255,12 @@ module.exports = class Discord {
 
                      this.client.users.fetch(userId).then(user => {
                         let imagesString = listsHelper.getAllImages(user, dbName);
-                        channel.send(imagesString, {split : true});
+                        if(imagesString != listHelper.ERROR_NO_DB){
+                           channel.send(imagesString, {split : true});
+                           return;
+                        }
+
+                        channel.send('You don\'t seem to have any images yet in this list');
                      });
                      return; //Always end and avoid useless checks
                   }
