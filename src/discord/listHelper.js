@@ -113,7 +113,7 @@ module.exports = class listHelper {
 
    getRandomImageCount(user, dbName, count){
       let images = Array();
-      for (count; count >= images.length; count--) {
+      for (let i = 0; i < count; i++) {
          images.push(this.getRandomImage(user, dbName));   
       }
 
