@@ -31,9 +31,12 @@ module.exports = class permissionHelper {
 
       let storageFile = this.storagePath + this.guildId + '/permissions.json';
       //create the DB
-      let database = low(new FileSync(storageFile));
+      let database = null;
       if(fs.existsSync(storageFile) == false){
+         database = low(new FileSync(storageFile));
          database.defaults({availablePermissions : [], users : {}, roles : {}}).write(); //User but also roles can have their own permissions
+      }else{
+         database = low(new FileSync(storageFile));
       }
 
       //All Permission into the DB please

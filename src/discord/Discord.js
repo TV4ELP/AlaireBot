@@ -376,6 +376,10 @@ module.exports = class Discord {
       let database = this.GetGuildStorage(event);
       let commands = this.GetAllCommands();
       this.UpdateCommands(database, commands); 
+      //needs to happen after the commands
+      let permissionHelperObj = new permissionHelper(this.client, guild.id, this.mainDB);
+      permissionHelperObj.setupDBForGuild();
+      
    }
 
    //Update the Storage Configs/Databases
@@ -523,10 +527,7 @@ module.exports = class Discord {
       let reactionHlp = new reactionHelper(this.client, guildId, this.mainDB);
       reactionHlp.setupDBForGuild();
 
-      let permissionHelperObj = new permissionHelper(this.client, guildId, this.mainDB);
-      permissionHelperObj.setupDBForGuild();
-
-      let roleHelperObj = new roleHelper(this.client, guildId, this.mainDB);
+      let roleHelperObj = new roleHelper(this.client, guild.id, this.mainDB);
       roleHelperObj.setupDBForGuild();
       
    }
