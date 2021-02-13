@@ -111,6 +111,15 @@ module.exports = class listHelper {
       return singleObj;
    }
 
+   getRandomImageCount(user, dbName, count){
+      let images = Array();
+      for (count; count >= images.length; count--) {
+         images.push(this.getRandomImage(user, dbName));   
+      }
+
+      return images;
+   }
+
    //Do a lazy search
    //Try to get an Image which is close to the name
    //

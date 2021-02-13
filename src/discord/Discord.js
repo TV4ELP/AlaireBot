@@ -51,6 +51,12 @@ module.exports = class Discord {
                                  description : "What List shal it be from (empty for default)",
                                  type : 3, //string
                                  required : false
+                              },
+                              {
+                                 name : "Count",
+                                 description : "How Many pleb?",
+                                 type : 4, //Int
+                                 required : false
                               }
                            ] 
                         },
@@ -150,7 +156,7 @@ module.exports = class Discord {
                      if(!nameOrRandom.options){
                         this.client.users.fetch(userId).then(user => {
                            let image = listsHelper.getRandomImage(user);
-                           if(image != listsHelper.ERROR_NO_DB){
+                           if(image != listHelper.ERROR_NO_DB){
                               this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
                                  type: 4,
                                  data : {
@@ -163,17 +169,32 @@ module.exports = class Discord {
 
                         
                      }else{
-                        let dbName = nameOrRandom.options[0].value;
+                        let dbName = null;
+                        let count = 1;
+                        nameOrRandom.options.forEach(element => {
+                           if(element.name === 'count'){
+                              count = element.value;
+                           }
+      
+                           if(element.name === 'listname'){
+                              dbName = element.value;
+                           }
+                        });
+
                         this.client.users.fetch(userId).then(user => {
-                           let image = listsHelper.getRandomImage(user, dbName);
-                           if(image != listsHelper.ERROR_NO_DB){
+                           let image = listsHelper.getRandomImageCount(user, dbName, count);
+                           if(image != listHelper.ERROR_NO_DB){
+                              let response = "";
+                              let i = 1;
+                              image.forEach(element => {
+                                 response += i + ": " + element.url + " \n";
+                                 i ++;
+                              })
                               this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                                 type: 4,
-                                 data : {
-                                    content: image.url
-                                 }
+                                 type: 5
                               }
                               });
+                              channel.send(response, {split : true});
                            }
                         });
                      }
@@ -195,7 +216,7 @@ module.exports = class Discord {
                      });
                      this.client.users.fetch(userId).then(user => {
                         let image = listsHelper.getRandomImage(user, listName);
-                        if(image == listsHelper.ERROR_NO_IMAGE_WITH_NAME){
+                        if(image == listHelper.ERROR_NO_IMAGE_WITH_NAME){
                            this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
                               type: 4,
                               data : {
