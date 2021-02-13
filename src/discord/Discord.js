@@ -7,6 +7,7 @@ const reactionHelper = require('./reactionHelper');
 const roleHelper = require('./roleHelper');
 const kickWatcher = require('./watcher/kickWatcher');
 const listHelper = require('./listHelper');
+const { url } = require('inspector');
 
 module.exports = class Discord {
    constructor(db){
@@ -136,11 +137,6 @@ module.exports = class Discord {
          const userId = interaction.member.user.id;
          const channel = this.client.channels.cache.get(interaction.channel_id);
 
-         this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 3,
-            }
-         });
-
          if (command === 'list'){ 
             let listsHelper = new listHelper(this.client, this.mainDB);
             if(args.length > 0){
@@ -155,7 +151,13 @@ module.exports = class Discord {
                         this.client.users.fetch(userId).then(user => {
                            let image = listsHelper.getRandomImage(user);
                            if(image != listsHelper.ERROR_NO_DB){
-                              channel.send(image.url);
+                              this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                                 type: 4,
+                                 data : {
+                                    content: image.url
+                                 }
+                              }
+                              });
                            }
                         });
 
@@ -165,7 +167,13 @@ module.exports = class Discord {
                         this.client.users.fetch(userId).then(user => {
                            let image = listsHelper.getRandomImage(user, dbName);
                            if(image != listsHelper.ERROR_NO_DB){
-                              channel.send(image.url);
+                              this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                                 type: 4,
+                                 data : {
+                                    content: image.url
+                                 }
+                              }
+                              });
                            }
                         });
                      }
@@ -188,11 +196,23 @@ module.exports = class Discord {
                      this.client.users.fetch(userId).then(user => {
                         let image = listsHelper.getRandomImage(user, listName);
                         if(image == listsHelper.ERROR_NO_IMAGE_WITH_NAME){
-                           channel.send("I couldn't find what you are looking for");
+                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                              type: 4,
+                              data : {
+                                 content: "I couldn't find what you are looking for"
+                              }
+                           }
+                           });
                            return;
                         }
 
-                        channel.send(image.url);
+                        this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                           type: 4,
+                           data : {
+                              content: image.url
+                           }
+                        }
+                        });
                      });
                   }
                }
@@ -221,14 +241,32 @@ module.exports = class Discord {
    
                      switch (result) {
                         case listHelper.ERROR_NO_DB:
-                           channel.send("Couldn't find a list with that name");
+                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                              type: 4,
+                              data : {
+                                 content: "Couldn't find a list with that name"
+                              }
+                           }
+                           });
                            break;
                         case listHelper.ERROR_INVALID_URL:
-                           channel.send("That was not a valid URL");
+                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                              type: 4,
+                              data : {
+                                 content: "That was not a valid URL"
+                              }
+                           }
+                           });
                            break;
                      
                         default:
-                           channel.send("Added");
+                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                              type: 4,
+                              data : {
+                                 content: "Added"
+                              }
+                           }
+                           });
                            return; //Everything is fine. Go home
                      }
                   });                  
@@ -241,7 +279,13 @@ module.exports = class Discord {
 
                      this.client.users.fetch(userId).then(user => {
                         let lists = listsHelper.gatAllLists(user);
-                        channel.send(lists);
+                        this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                           type: 4,
+                           data : {
+                              content: lists
+                           }
+                        }
+                        });
                      });
                      return; //Always end and avoid useless checks
                   }
@@ -256,11 +300,21 @@ module.exports = class Discord {
                      this.client.users.fetch(userId).then(user => {
                         let imagesString = listsHelper.getAllImages(user, dbName);
                         if(imagesString != listHelper.ERROR_NO_DB){
+                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                              type: 5
+                           }
+                           });
                            channel.send(imagesString, {split : true});
                            return;
                         }
 
-                        channel.send('You don\'t seem to have any images yet in this list');
+                        this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                           type: 4,
+                           data : {
+                              content: "You don\'t seem to have any images yet in this list"
+                           }
+                        }
+                        });
                      });
                      return; //Always end and avoid useless checks
                   }
