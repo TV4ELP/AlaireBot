@@ -215,7 +215,7 @@ module.exports = class Discord {
                         }
                      });
                      this.client.users.fetch(userId).then(user => {
-                        let image = listsHelper.getRandomImage(user, listName);
+                        let image = listsHelper.getImageByName(user, listName, imageName);
                         if(image == listHelper.ERROR_NO_IMAGE_WITH_NAME){
                            this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
                               type: 4,
