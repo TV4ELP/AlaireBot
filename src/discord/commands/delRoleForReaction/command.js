@@ -48,12 +48,9 @@ module.exports.classObj = class delRoleForReaction extends addRoleForReaction{
          return true;
       }
 
-      this.event.channel.send('That Emote is not tied to any Role yet for Reactions');
+      this.event.channel.send('That Emote or Role is not used yet for Reactions')
    }
 
-   respondNothing(){
-      this.event.channel.send('That Emote is not tied to any Role yet for Reactions')
-   }
 
    respond(resultObj){
       let reactionHelper = this.getReactionHelper();
