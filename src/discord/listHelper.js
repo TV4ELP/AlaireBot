@@ -113,11 +113,7 @@ module.exports = class listHelper {
 
    getRandomImageCount(user, dbName, count){
       let images = Array();
-      for (let i = 0; i < count; i++) {
-         //Discord can only embed 5 anyways
-         if(images.length == 5){
-            continue;
-         }
+      for (count; count >= images.length; count--) {
          images.push(this.getRandomImage(user, dbName));   
       }
 

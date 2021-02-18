@@ -35,7 +35,7 @@ module.exports.classObj = class delRoleForReaction extends addRoleForReaction{
 
    updateDatabase(emoteId, reactionDb, roleId){
       let existing = reactionDb.get('roleAndEmote').find({emoteId : emoteId});
-      let existingObj = existing.value()
+      let existingObj = existing.value();
       let resultObj = Object(); //init so no crash
 
       //If this pair exists, YEET it out
@@ -50,6 +50,7 @@ module.exports.classObj = class delRoleForReaction extends addRoleForReaction{
       //Maybe we need to delete by role
       existing = reactionDb.get('roleAndEmote').find({roleId : roleId});
       if(existing.value() != null){
+         existingObj = existing.value();
          reactionDb.get('roleAndEmote').remove({roleId : roleId}).write();
          resultObj.emoteId = existingObj.emoteId;
          resultObj.roleId = existingObj.roleId;

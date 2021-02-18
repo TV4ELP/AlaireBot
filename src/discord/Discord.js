@@ -215,7 +215,7 @@ module.exports = class Discord {
                         }
                      });
                      this.client.users.fetch(userId).then(user => {
-                        let image = listsHelper.getImageByName(user, listName, imageName);
+                        let image = listsHelper.getRandomImage(user, listName);
                         if(image == listHelper.ERROR_NO_IMAGE_WITH_NAME){
                            this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
                               type: 4,
@@ -376,10 +376,6 @@ module.exports = class Discord {
       let database = this.GetGuildStorage(event);
       let commands = this.GetAllCommands();
       this.UpdateCommands(database, commands); 
-      //needs to happen after the commands
-      let permissionHelperObj = new permissionHelper(this.client, guild.id, this.mainDB);
-      permissionHelperObj.setupDBForGuild();
-      
    }
 
    //Update the Storage Configs/Databases
@@ -527,7 +523,10 @@ module.exports = class Discord {
       let reactionHlp = new reactionHelper(this.client, guildId, this.mainDB);
       reactionHlp.setupDBForGuild();
 
-      let roleHelperObj = new roleHelper(this.client, guild.id, this.mainDB);
+      let permissionHelperObj = new permissionHelper(this.client, guildId, this.mainDB);
+      permissionHelperObj.setupDBForGuild();
+
+      let roleHelperObj = new roleHelper(this.client, guildId, this.mainDB);
       roleHelperObj.setupDBForGuild();
       
    }
