@@ -23,16 +23,6 @@ module.exports.classObj = class delRoleForReaction extends addRoleForReaction{
       super.execute();
    }
 
-   //We only care for the Emotes
-   checkValid(emoteArray, roleMap){
-      let returnVal = true;
-      if(emoteArray.length == 0){
-         this.event.channel.send('No Emote specified');
-         returnVal = false;
-      }
-      return returnVal;
-   }
-
    updateDatabase(emoteId, reactionDb, roleId){
       let existing = reactionDb.get('roleAndEmote').find({emoteId : emoteId});
       let existingObj = existing.value();
