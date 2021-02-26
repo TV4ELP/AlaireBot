@@ -113,7 +113,7 @@ module.exports = class listHelper {
 
    getRandomImageCount(user, dbName, count){
       let images = Array();
-      for (count; count >= images.length; count--) {
+      for (count; count > 0; count--) {
          images.push(this.getRandomImage(user, dbName));   
       }
 
@@ -145,10 +145,10 @@ module.exports = class listHelper {
    }
 
 
+   //Get All Lists in a nice Format
    //
    //
-   //
-   gatAllLists(user){
+   getAllLists(user){
       const id = user.id;
       const userStorage = this.storagePath + id;
       let files = fs.readdirSync(userStorage);
@@ -161,18 +161,20 @@ module.exports = class listHelper {
          entries.push(resObj);               
       }
 
-      let string = "Here are your lists \n";
       if(entries.length == 0){
-         string = "You don't have any lists yet";
+         return "You don't have any lists yet";
       }
 
+      let string = "__Behold thy lists__ \n";
       entries.forEach(element => {
-         string += element.name + " :Image Count:" + element.count + "\n";
+         string += "**" + element.name + " (" + element.count + " images)**\n";
       });
 
       return string;
    }
 
+   /*
+   //PLS DELETE ON End of March 2021 if no Use is found
    getAllImages(user, dbName){
       let db = this.getDatabaseByname(dbName, user);
       if(!db){
@@ -197,5 +199,6 @@ module.exports = class listHelper {
 
       return BigString;
    }
+   */
    
 }
