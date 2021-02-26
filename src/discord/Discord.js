@@ -26,117 +26,114 @@ module.exports = class Discord {
       watcher.watch();
    }
 
-   //Login to the Discord API and make sure we have everything needed to make calls to it
-   Start(){
-      //Slash Command Example. Maybe wait for an official implementation
-      this.client.on('ready', () => {
-         this.client.api.applications(this.client.user.id).commands.post({
-            data: {
-               name: "list",
-               description: "All the lists",
-               // possible options here e.g. options: [{...}]
-               options: [
-                  {
-                     name: "get",
-                     description: "We want something back",
-                     type: 2, //subgroup
-                     options: [
-                        {
-                           name : "random",
-                           description : "it could be anything",
-                           type : 1,//subcommand
-                           options : [
-                              {
-                                 name : "ListName",
-                                 description : "What List shal it be from (empty for default)",
-                                 type : 3, //string
-                                 required : false
-                              },
-                              {
-                                 name : "Count",
-                                 description : "How Many pleb?",
-                                 type : 4, //Int
-                                 required : false
-                              }
-                           ] 
-                        },
-                        {
-                           name : "by-name",
-                           description : "you know what you are searching for",
-                           type : 1,
-                           options : [
-                              {
-                                 name : "ImageName",
-                                 description : "How is it's precious name?",
-                                 type : 3,
-                                 required: true
-                                 
-                              },
-                              {
-                                 name : "ListName",
-                                 description : "What List shal it be from (empty for default)",
-                                 type : 3,
-                                 required : false
-                              }
-                           ]
-                        }
-                     ]
-                  },
-                  {
-                     name: "add",
-                     description: "Pls full me up~",
-                     type :1, 
-                     options:[
-                        {
-                           name : "URL",
-                           description : "The Image Link Please",
-                           type : 3, //string
-                           required : true
-                        },
-                        {
-                           name : "ImageName",
-                           description : "A name to find it better in the future?",
-                           type : 3, //string
-                           required : false
-                        },
-                        {
-                           name : "ListName",
-                           description : "What List shal it be from (empty for default)",
-                           type : 3, //string
-                           required : false
-                        }
-                     ]
-                  },
-                  {
-                     name: "show",
-                     description: "Show what you got",
-                     type: 2, //subgroup
-                     options: [
-                        {
-                           name : "lists",
-                           description : "what lists do you have",
-                           type : 1,//subcommand
-                        },
-                        {
-                           name : "images",
-                           description : "a whole dump for ya",
-                           type : 1,
-                           options : [
-                              {
-                                 name : "ListName",
-                                 description : "What List shal it be from (empty for default)",
-                                 type : 3,
-                                 required : false
-                              }
-                           ]
-                        }
-                     ]
-                  }
-               ]
-            }
-         });
-     });
+   RegisterNewCommands(){
+      this.client.api.applications(this.client.user.id).commands.post({
+         data: {
+            name: "list",
+            description: "All the lists",
+            // possible options here e.g. options: [{...}]
+            options: [
+               {
+                  name: "get",
+                  description: "We want something back",
+                  type: 2, //subgroup
+                  options: [
+                     {
+                        name : "random",
+                        description : "it could be anything",
+                        type : 1,//subcommand
+                        options : [
+                           {
+                              name : "ListName",
+                              description : "What List shal it be from (empty for default)",
+                              type : 3, //string
+                              required : false
+                           },
+                           {
+                              name : "Count",
+                              description : "How Many pleb?",
+                              type : 4, //Int
+                              required : false
+                           }
+                        ] 
+                     },
+                     {
+                        name : "by-name",
+                        description : "you know what you are searching for",
+                        type : 1,
+                        options : [
+                           {
+                              name : "ImageName",
+                              description : "How is it's precious name?",
+                              type : 3,
+                              required: true
+                              
+                           },
+                           {
+                              name : "ListName",
+                              description : "What List shal it be from (empty for default)",
+                              type : 3,
+                              required : false
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  name: "add",
+                  description: "Pls fill me up~",
+                  type :1, 
+                  options:[
+                     {
+                        name : "URL",
+                        description : "The Image Link Please",
+                        type : 3, //string
+                        required : true
+                     },
+                     {
+                        name : "ImageName",
+                        description : "A name to find it better in the future?",
+                        type : 3, //string
+                        required : false
+                     },
+                     {
+                        name : "ListName",
+                        description : "What List shal it be from (empty for default)",
+                        type : 3, //string
+                        required : false
+                     }
+                  ]
+               },
+               {
+                  name: "collection",
+                  description: "Let me show you all of your lists",
+                  type: 1 //subcommand
+               }
+            ]
+         }
+      });
+   }
 
+
+   UpdateSlashCommands(){
+      let commandPromise = this.RemoveCommands();
+
+      commandPromise.then(list => {
+         list.forEach(element => {
+            let commandId = element.id;
+            this.client.api.applications(this.client.user.id).commands(commandId).delete();
+         });
+         this.RegisterNewCommands();
+      });
+
+      this.HandleInterActionEvents();
+   }
+
+   RemoveCommands(){
+      return this.client.api.applications(this.client.user.id).commands.get();
+   }
+
+   HandleInterActionEvents(){
       this.client.ws.on('INTERACTION_CREATE', async interaction => {
          const command = interaction.data.name.toLowerCase();
          const args = interaction.data.options;
@@ -144,205 +141,130 @@ module.exports = class Discord {
          const channel = this.client.channels.cache.get(interaction.channel_id);
 
          if (command === 'list'){ 
-            let listsHelper = new listHelper(this.client, this.mainDB);
-            if(args.length > 0){
-               //Now Check if we wanna get or add
-               let getAdd = args[0];
-               if(getAdd.name === 'get'){
-                  let getOptions = getAdd.options;
-                  let nameOrRandom = getOptions[0];
-                  if(nameOrRandom.name === 'random'){
-                     //Do we have a list Name?
-                     if(!nameOrRandom.options){
-                        this.client.users.fetch(userId).then(user => {
-                           let image = listsHelper.getRandomImage(user);
-                           if(image != listHelper.ERROR_NO_DB){
-                              this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                                 type: 4,
-                                 data : {
-                                    content: image.url
-                                 }
-                              }
-                              });
-                           }
-                        });
-
-                        
-                     }else{
-                        let dbName = null;
-                        let count = 1;
-                        nameOrRandom.options.forEach(element => {
-                           if(element.name === 'count'){
-                              count = element.value;
-                           }
-      
-                           if(element.name === 'listname'){
-                              dbName = element.value;
-                           }
-                        });
-
-                        this.client.users.fetch(userId).then(user => {
-                           let image = listsHelper.getRandomImageCount(user, dbName, count);
-                           if(image != listHelper.ERROR_NO_DB){
-                              let response = "";
-                              let i = 1;
-                              image.forEach(element => {
-                                 response += i + ": " + element.url + " \n";
-                                 i ++;
-                              })
-                              this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                                 type: 5
-                              }
-                              });
-                              channel.send(response, {split : true});
-                           }
-                        });
-                     }
-                     return; //Always end and avoid useless checks
-                  }
-                  if(nameOrRandom.name === 'by-name'){
-                     let imageName = null;
-                     let listName = null;
-
-                     let getOptions = nameOrRandom.options;
-                     getOptions.forEach(element => {   
-                        if(element.name === 'imagename'){
-                           imageName = element.value;
-                        }
-   
-                        if(element.name === 'listname'){
-                           listName = element.value;
-                        }
-                     });
-                     this.client.users.fetch(userId).then(user => {
-                        let image = listsHelper.getRandomImage(user, listName);
-                        if(image == listHelper.ERROR_NO_IMAGE_WITH_NAME){
-                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                              type: 4,
-                              data : {
-                                 content: "I couldn't find what you are looking for"
-                              }
-                           }
-                           });
-                           return;
-                        }
-
-                        this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                           type: 4,
-                           data : {
-                              content: image.url
-                           }
-                        }
-                        });
-                     });
-                  }
-               }
-
-               if(getAdd.name === 'add'){
-                  let addOptions = getAdd.options;
-                  let listName = null;
-                  let url = null;
-                  let imageName = null;
-                  addOptions.forEach(element => {
-                     if(element.name === 'url'){
-                        url = element.value;
-                     }
-
-                     if(element.name === 'imagename'){
-                        imageName = element.value;
-                     }
-
-                     if(element.name === 'listname'){
-                        listName = element.value;
-                     }
-                  });
-                  
-                  this.client.users.fetch(userId).then(user => {
-                     let result = listsHelper.addImageToDatabase(user, listName, url, imageName);
-   
-                     switch (result) {
-                        case listHelper.ERROR_NO_DB:
-                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                              type: 4,
-                              data : {
-                                 content: "Couldn't find a list with that name"
-                              }
-                           }
-                           });
-                           break;
-                        case listHelper.ERROR_INVALID_URL:
-                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                              type: 4,
-                              data : {
-                                 content: "That was not a valid URL"
-                              }
-                           }
-                           });
-                           break;
-                     
-                        default:
-                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                              type: 4,
-                              data : {
-                                 content: "Added"
-                              }
-                           }
-                           });
-                           return; //Everything is fine. Go home
-                     }
-                  });                  
-               }
-
-               if(getAdd.name === 'show'){
-                  let showOptions = getAdd.options;
-                  let listOrImages = showOptions[0];
-                  if(listOrImages.name === 'lists'){
-
-                     this.client.users.fetch(userId).then(user => {
-                        let lists = listsHelper.gatAllLists(user);
-                        this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                           type: 4,
-                           data : {
-                              content: lists
-                           }
-                        }
-                        });
-                     });
-                     return; //Always end and avoid useless checks
-                  }
-
-                  if(listOrImages.name === 'images'){
-                     let dbName = "default";
-
-                     if(listOrImages.options){
-                        dbName = listOrImages.options[0].value;
-                     }
-
-                     this.client.users.fetch(userId).then(user => {
-                        let imagesString = listsHelper.getAllImages(user, dbName);
-                        if(imagesString != listHelper.ERROR_NO_DB){
-                           this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                              type: 5
-                           }
-                           });
-                           channel.send(imagesString, {split : true});
-                           return;
-                        }
-
-                        this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                           type: 4,
-                           data : {
-                              content: "You don\'t seem to have any images yet in this list"
-                           }
-                        }
-                        });
-                     });
-                     return; //Always end and avoid useless checks
-                  }
-               }
-            }
+            this.HandleListCommandInternal(interaction, args, userId, channel);
          }
       });
+   }
+
+   HandleListCommandInternal(interaction, args, userId, channel){
+      if(args.length == 0){
+         return;
+      }
+
+
+      let listsHelper = new listHelper(this.client, this.mainDB);
+      //Now Check if we wanna get or add
+      let subGroup = args[0];
+      if(subGroup.name === 'get'){
+         let getOptions = getAdd.options;
+         let nameOrRandom = getOptions[0];
+         if(nameOrRandom.name === 'random'){
+            //Do we have a list Name?
+            if(!nameOrRandom.options){
+               this.client.users.fetch(userId).then(user => {
+                  let image = listsHelper.getRandomImage(user);
+                  if(image != listHelper.ERROR_NO_DB){
+                     this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                        type: 4,
+                        data : {
+                           content: image.url
+                        }
+                     }
+                     });
+                  }
+               });
+
+               
+            }else{
+               let dbName = null;
+               let count = 1;
+               nameOrRandom.options.forEach(element => {
+                  if(element.name === 'count'){
+                     count = element.value;
+                  }
+
+                  if(element.name === 'listname'){
+                     dbName = element.value;
+                  }
+               });
+
+               this.client.users.fetch(userId).then(user => {
+                  let image = listsHelper.getRandomImageCount(user, dbName, count);
+                  if(image != listHelper.ERROR_NO_DB){
+                     let response = "";
+                     let i = 1;
+                     image.forEach(element => {
+                        response += i + ": " + element.url + " \n";
+                        i ++;
+                     })
+                     this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                        type: 5
+                     }
+                     });
+                     channel.send(response, {split : true});
+                  }
+               });
+            }
+            return; //Always end and avoid useless checks
+         }
+         if(nameOrRandom.name === 'by-name'){
+            let imageName = null;
+            let listName = null;
+
+            let getOptions = nameOrRandom.options;
+            getOptions.forEach(element => {   
+               if(element.name === 'imagename'){
+                  imageName = element.value;
+               }
+
+               if(element.name === 'listname'){
+                  listName = element.value;
+               }
+            });
+            this.client.users.fetch(userId).then(user => {
+               let image = listsHelper.getRandomImage(user, listName);
+               if(image == listHelper.ERROR_NO_IMAGE_WITH_NAME){
+                  this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                     type: 4,
+                     data : {
+                        content: "I couldn't find what you are looking for"
+                     }
+                  }
+                  });
+                  return;
+               }
+
+               this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+                  type: 4,
+                  data : {
+                     content: image.url
+                  }
+               }
+               });
+            });
+         }
+      }
+
+      if(subGroup.name === 'add'){
+         let slashcommandListAddObj = new(require("./slashCommands/list-add"))(this, interaction, subGroup, userId, channel);
+         slashcommandListAddObj.processSubGroupAdd();           
+      }
+
+      if(subGroup.name === 'collection'){
+         let slashcommandShowListsObj = new(require("./slashCommands/list-collection"))(this, interaction, subGroup, userId, channel);
+         slashcommandShowListsObj.processSubGroupShow();           
+      }
+   }
+   
+
+
+
+   //Login to the Discord API and make sure we have everything needed to make calls to it
+   Start(){
+      //Slash Command Example. Maybe wait for an official implementation
+      this.client.on('ready', () => {
+         this.UpdateSlashCommands();
+     });
 
       this.client.login(fs.readFileSync('discord.key', 'utf8').trim()).then( () => {
          //make sure we are actually logged in before we try to do anything
