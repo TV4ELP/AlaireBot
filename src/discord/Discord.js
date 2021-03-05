@@ -135,7 +135,10 @@ module.exports = class Discord {
       this.client.ws.on('INTERACTION_CREATE', async interaction => {
          const command = interaction.data.name.toLowerCase();
          const args = interaction.data.options;
-         const userId = interaction.member.user.id;
+         let userId = interaction.member?.user.id;
+         if(!userId){
+            userId = interaction.user.id
+         }
          const channel = this.client.channels.cache.get(interaction.channel_id);
 
          if (command === 'list'){ 
