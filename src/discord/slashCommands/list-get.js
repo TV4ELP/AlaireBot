@@ -10,8 +10,8 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
    processSubGroup(){
 
       let showOptions = this.args.options[0];
-      let listName = null;
-      let count = null;
+      let listName = undefined;
+      let count = undefined;
 
       showOptions.options?.forEach(element => {
          if(element.name === 'listname'){

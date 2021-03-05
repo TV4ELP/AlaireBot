@@ -6,8 +6,6 @@ const permissionHelper = require('./permissionHelper');
 const reactionHelper = require('./reactionHelper');
 const roleHelper = require('./roleHelper');
 const kickWatcher = require('./watcher/kickWatcher');
-const listHelper = require('./listHelper');
-const { url } = require('inspector');
 
 module.exports = class Discord {
    constructor(db){
@@ -27,7 +25,7 @@ module.exports = class Discord {
    }
 
    RegisterNewCommands(){
-      this.client.api.applications(this.client.user.id).commands.post({
+      this.client.api.applications(this.client.user.id).guilds('366942872219549697').commands.post({
          data: {
             name: "list",
             description: "All the lists",
