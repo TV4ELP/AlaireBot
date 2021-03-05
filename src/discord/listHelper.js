@@ -11,6 +11,7 @@ module.exports = class listHelper {
       this.discordClient = discordClient;
       this.mainDB = mainDB;
       this.storagePath = this.getStoragePath();
+      this.maxRetry = 50;
    }
 
    getStoragePath(){
@@ -113,8 +114,20 @@ module.exports = class listHelper {
 
    getRandomImageCount(user, dbName, count){
       let images = Array();
-      for (count; count > 0; count--) {
-         images.push(this.getRandomImage(user, dbName));   
+      let retry = 0;
+      for (;count > images.length && retry <= this.maxRetry;) {
+         let singleImage = this.getRandomImage(user, dbName);
+
+         let existent = images.some(element =>{
+            return element.url == singleImage.url
+         });
+
+         if (!existent){
+            images.push(singleImage);
+          }else{
+            retry ++;
+          }
+         
       }
 
       return images;

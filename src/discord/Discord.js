@@ -56,7 +56,7 @@ module.exports = class Discord {
                               required : false
                            }
                         ] 
-                     },
+                     }/* Don't use that currently,
                      {
                         name : "by-name",
                         description : "you know what you are searching for",
@@ -76,7 +76,7 @@ module.exports = class Discord {
                               required : false
                            }
                         ]
-                     }
+                     }*/
                   ]
                },
                {
@@ -151,108 +151,22 @@ module.exports = class Discord {
          return;
       }
 
-
-      let listsHelper = new listHelper(this.client, this.mainDB);
       //Now Check if we wanna get or add
       let subGroup = args[0];
+     
       if(subGroup.name === 'get'){
-         let getOptions = getAdd.options;
-         let nameOrRandom = getOptions[0];
-         if(nameOrRandom.name === 'random'){
-            //Do we have a list Name?
-            if(!nameOrRandom.options){
-               this.client.users.fetch(userId).then(user => {
-                  let image = listsHelper.getRandomImage(user);
-                  if(image != listHelper.ERROR_NO_DB){
-                     this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                        type: 4,
-                        data : {
-                           content: image.url
-                        }
-                     }
-                     });
-                  }
-               });
-
-               
-            }else{
-               let dbName = null;
-               let count = 1;
-               nameOrRandom.options.forEach(element => {
-                  if(element.name === 'count'){
-                     count = element.value;
-                  }
-
-                  if(element.name === 'listname'){
-                     dbName = element.value;
-                  }
-               });
-
-               this.client.users.fetch(userId).then(user => {
-                  let image = listsHelper.getRandomImageCount(user, dbName, count);
-                  if(image != listHelper.ERROR_NO_DB){
-                     let response = "";
-                     let i = 1;
-                     image.forEach(element => {
-                        response += i + ": " + element.url + " \n";
-                        i ++;
-                     })
-                     this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                        type: 5
-                     }
-                     });
-                     channel.send(response, {split : true});
-                  }
-               });
-            }
-            return; //Always end and avoid useless checks
-         }
-         if(nameOrRandom.name === 'by-name'){
-            let imageName = null;
-            let listName = null;
-
-            let getOptions = nameOrRandom.options;
-            getOptions.forEach(element => {   
-               if(element.name === 'imagename'){
-                  imageName = element.value;
-               }
-
-               if(element.name === 'listname'){
-                  listName = element.value;
-               }
-            });
-            this.client.users.fetch(userId).then(user => {
-               let image = listsHelper.getRandomImage(user, listName);
-               if(image == listHelper.ERROR_NO_IMAGE_WITH_NAME){
-                  this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                     type: 4,
-                     data : {
-                        content: "I couldn't find what you are looking for"
-                     }
-                  }
-                  });
-                  return;
-               }
-
-               this.client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                  type: 4,
-                  data : {
-                     content: image.url
-                  }
-               }
-               });
-            });
-         }
+         let slashcommandListGetObj = new(require("./slashCommands/list-get"))(this, interaction, subGroup, userId, channel);
+         slashcommandListGetObj.processSubGroup();           
       }
 
       if(subGroup.name === 'add'){
          let slashcommandListAddObj = new(require("./slashCommands/list-add"))(this, interaction, subGroup, userId, channel);
-         slashcommandListAddObj.processSubGroupAdd();           
+         slashcommandListAddObj.processSubGroup();           
       }
 
       if(subGroup.name === 'collection'){
          let slashcommandShowListsObj = new(require("./slashCommands/list-collection"))(this, interaction, subGroup, userId, channel);
-         slashcommandShowListsObj.processSubGroupShow();           
+         slashcommandShowListsObj.processSubGroup();           
       }
    }
    

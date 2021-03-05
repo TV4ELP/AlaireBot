@@ -7,7 +7,7 @@ module.exports = class slashcommandShowLists extends slashcommandListAdd{
       super(process, interaction, args, userId, channel)
    }
  
-   processSubGroupShow(){
+   processSubGroup(){
       let listsHelper = new listHelper(this.process.client, this.process.mainDB);
       this.showLists(listsHelper);
       return; //Always end and avoid useless checks

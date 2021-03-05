@@ -9,8 +9,8 @@ module.exports = class slashcommandListAdd {
       this.userId = userId; //userid who used the interaction
       this.channel = channel; //channel Obj
    }
- 
-   processSubGroupAdd(){
+
+   processSubGroup(){
       let addOptions = this.args.options;
       let listName = null;
       let url = null;
