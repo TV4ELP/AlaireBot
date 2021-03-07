@@ -10,7 +10,7 @@ module.exports = class kickWatcher {
    }
 
    watch(){
-      let databases = this.watchAllDatabses();
+      this.watchAllDatabses();
    }
 
    watchAllDatabses(){

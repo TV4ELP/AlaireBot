@@ -6,6 +6,7 @@ const permissionHelper = require('./permissionHelper');
 const reactionHelper = require('./reactionHelper');
 const roleHelper = require('./roleHelper');
 const kickWatcher = require('./watcher/kickWatcher');
+const loginWatcher = require('./watcher/loginWatcher');
 
 module.exports = class Discord {
    constructor(db){
@@ -21,11 +22,14 @@ module.exports = class Discord {
    //Start all watcher that have to check if a certain time/condition has been met 
    StartWatcher(){
       let watcher = new kickWatcher(this.client);
+      let login = new loginWatcher(this.client);
+
       watcher.watch();
+      login.watch();
    }
 
    RegisterNewCommands(){
-      this.client.api.applications(this.client.user.id).commands.post({
+      this.client.api.applications(this.client.user.id).guilds('366942872219549697').commands.post({
          data: {
             name: "list",
             description: "All the lists",
@@ -106,6 +110,11 @@ module.exports = class Discord {
                   name: "collection",
                   description: "Let me show you all of your lists",
                   type: 1 //subcommand
+               },
+               {
+                  name: "manage",
+                  description: "Managing is hard, this makes it easy",
+                  type: 1 //subcommand
                }
             ]
          }
@@ -168,6 +177,11 @@ module.exports = class Discord {
       if(subGroup.name === 'collection'){
          let slashcommandShowListsObj = new(require("./slashCommands/list-collection"))(this, interaction, subGroup, userId, channel);
          slashcommandShowListsObj.processSubGroup();           
+      }
+
+      if(subGroup.name === 'manage'){
+         let slashcommandManageObj = new(require("./slashCommands/list-manage"))(this, interaction, subGroup, userId, channel);
+         slashcommandManageObj.processSubGroup();           
       }
    }
    

@@ -20,5 +20,6 @@
       "permissions": [],
       "params": "/list create new listName** (can't contain spaces) **optional"
     }
-  ]
+  ],
+  "listsLoginStoragePath": "storage/oneTimeLogin/"
 }

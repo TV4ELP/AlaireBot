@@ -26,6 +26,12 @@ module.exports = class Main {
       } 
       console.log("List Folder is setup");
 
+      //One Time Logins are valid for a short time and allow users to manage their image lists
+      if(fs.existsSync('./storage/oneTimeLogin') == false){
+         fs.mkdirSync('./storage/oneTimeLogin')
+      } 
+      console.log("List One Time Login Folder is setup");
+
       //We now have our DB, return it. 
       let db = low(new FileSync('storage/main.json'));
 
@@ -39,6 +45,10 @@ module.exports = class Main {
 
       if(db.get('listsStoragePath').value() == null){
          db.set('listsStoragePath', 'storage/lists/').write();
+      }
+
+      if(db.get('listsLoginStoragePath').value() == null){
+         db.set('listsLoginStoragePath', 'storage/oneTimeLogin/').write();
       }
       console.log("Main Database is Setup");
 

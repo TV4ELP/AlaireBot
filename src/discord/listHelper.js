@@ -1,6 +1,8 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
+const crypto = require('crypto');
+
 module.exports = class listHelper {
    //Error Types
    static ERROR_NO_DB = 2;
@@ -12,12 +14,45 @@ module.exports = class listHelper {
       this.mainDB = mainDB;
       this.storagePath = this.getStoragePath();
       this.maxRetry = 50;
+      this.loginPath = this.getStorageLoginPath();
    }
 
    getStoragePath(){
       return this.mainDB.get('listsStoragePath').value();
    }
 
+   getStorageLoginPath(){
+      return this.mainDB.get('listsLoginStoragePath').value();
+   }
+
+   //Return a still in use Login or create a new one based on random Data
+   //These don't have to be cryptographically secure, just random enoughss
+   createLoginForUser(user){
+      const id = user.id;
+      const userLoginPath = this.loginPath + id + ".loginkey";
+      if(fs.existsSync(userLoginPath)){
+         return fs.readFileSync(userLoginPath).trim();
+      }else{
+         let loginId = crypto.randomBytes(20).toString('hex');
+         fs.writeFileSync(userLoginPath, loginId);
+         return loginId;
+      }
+   }
+
+   //Check if the supplied login Key is correct
+   checkLoginForUser(user, login){
+      const id = user.id;
+      const userLoginPath = this.loginPath + id + ".loginkey";
+      if(fs.existsSync(userLoginPath)){
+         let content =  fs.readFileSync(userLoginPath).trim();
+         if (content == login.trim()){
+            return true;
+         }
+      }
+
+      return false;
+   }
+   
    //Create New or Return existing List Folder plus Database for UserID
    //Input String Name / User ID / Weather you want to create or not
    //
