@@ -17,11 +17,12 @@ module.exports = class loginWatcher extends kickWatcher{
       let dirs = fs.readdirSync(storagePath);
       for(let i = 0; dirs.length > i; i++){
          let dir = dirs[i]; 
-         let time = fs.statSync(storagePath + dir).ctime;
+         let time = fs.statSync(storagePath + dir).mtime;
          let now = new Date();
          let diff = now - time;
          if(diff > timetoLive){
             fs.rmSync(storagePath + dir);
+            console.log("Removed LoginKey:" + storagePath + dir);
          }
       }
    }
