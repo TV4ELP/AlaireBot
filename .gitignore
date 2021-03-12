@@ -6,3 +6,4 @@ npm-debug.log
 storage
 discord.key
 .firstStart
+storage/main.json
