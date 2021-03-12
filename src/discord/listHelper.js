@@ -31,12 +31,22 @@ module.exports = class listHelper {
       const id = user.id;
       const userLoginPath = this.loginPath + id + ".loginkey";
       if(fs.existsSync(userLoginPath)){
-         return fs.readFileSync(userLoginPath).trim();
+         fs.utimesSync(userLoginPath, new Date(), new Date());
+         return fs.readFileSync(userLoginPath, 'ascii').trim(); //We need an encoding else we only get stupid buffers
       }else{
          let loginId = crypto.randomBytes(20).toString('hex');
          fs.writeFileSync(userLoginPath, loginId);
          return loginId;
       }
+   }
+
+   //The URL the User will visit to interface with his lists
+   loginUrl(loginKey, user){
+      let id = user.id; 
+      let path = id + "/" + loginKey
+      let serverPath = this.mainDB.get('FrontFacingApiServerUrl').value();
+
+      return serverPath + path;
    }
 
    //Check if the supplied login Key is correct
