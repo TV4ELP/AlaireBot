@@ -55,6 +55,12 @@ module.exports = class Main {
       if(db.get('FrontFacingApiServerUrl').value() == null){
          db.set('FrontFacingApiServerUrl', 'https://alair.ps.hn/').write();
          console.log("Front Facing Server is set to: https://alair.ps.hn/");
+         
+      }
+
+      if(db.get('port').value() == null){
+         db.set('port', 9999).write();
+         console.log("Front Facing Server Port set to: 9999");         
       }
 
       

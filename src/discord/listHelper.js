@@ -54,7 +54,7 @@ module.exports = class listHelper {
       const id = user.id;
       const userLoginPath = this.loginPath + id + ".loginkey";
       if(fs.existsSync(userLoginPath)){
-         let content =  fs.readFileSync(userLoginPath).trim();
+         let content =  fs.readFileSync(userLoginPath, 'ascii').trim();
          if (content == login.trim()){
             return true;
          }
@@ -229,6 +229,22 @@ module.exports = class listHelper {
       });
 
       return string;
+   }
+
+
+   getAllForApi(user){
+      const id = user.id;
+      const userStorage = this.storagePath + id;
+      let files = fs.readdirSync(userStorage);
+      let entries = Array();
+      for(let i = 0; files.length > i; i++){
+         let file = files[i];
+         let name = file.slice(0,-5); //remove .json
+         let list = this.getDatabaseByname(name, user).get('images').value();
+         entries.push({[name] : list}); //in brackets so that js interpetes the variable and not takes the literal name         
+      }
+
+      return entries;
    }
 
    /*
