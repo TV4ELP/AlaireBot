@@ -38,7 +38,8 @@ module.exports = class slashcommandListAdd {
                this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({data: {
                   type: 4,
                   data : {
-                     content: "That was not a valid URL"
+                     content: "That was not a valid URL",
+                     flags: 64 //ephemeral aka, only you can see it
                   }
                }
                });
@@ -46,7 +47,8 @@ module.exports = class slashcommandListAdd {
          
             default:
                this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({data: {
-                  type: 5 //ACK a command without sending a message, showing the users input
+                  type: 5, //ACK a command without sending a message, showing the users input
+                  flags: 64 //ephemeral aka, only you can see it
                }
                });
                return; //Everything is fine. Go home

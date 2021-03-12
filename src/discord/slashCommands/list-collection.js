@@ -19,7 +19,8 @@ module.exports = class slashcommandShowLists extends slashcommandListAdd{
          this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({data: {
             type: 4,
             data : {
-               content: lists
+               content: lists,
+               flags: 64 //ephemeral aka, only you can see it
             }
          }
          });
