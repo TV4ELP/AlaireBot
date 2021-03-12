@@ -5,7 +5,8 @@ const low = require('lowdb');
 //We wan't to write and read synchronously to keep things simple
 const FileSync = require('lowdb/adapters/FileSync');
 //Main just sets the envirtoment up, the Discord Class sets the Bot up/starts it
-const Discord = require('./discord/Discord.js');
+const Discord = require('./discord/Discord');
+const API = require('./api/Server');
 
 module.exports = class Main {
    constructor(){
@@ -50,6 +51,13 @@ module.exports = class Main {
       if(db.get('listsLoginStoragePath').value() == null){
          db.set('listsLoginStoragePath', 'storage/oneTimeLogin/').write();
       }
+
+      if(db.get('FrontFacingApiServerUrl').value() == null){
+         db.set('FrontFacingApiServerUrl', 'https://alair.ps.hn/').write();
+         console.log("Front Facing Server is set to: https://alair.ps.hn/");
+      }
+
+      
       console.log("Main Database is Setup");
 
       return db;
@@ -61,9 +69,12 @@ module.exports = class Main {
       return discord;
    }
 
-   //Everything Setup, we now only need to start the bot
+   //Start the Bot and the API
    Start(){
       this.discord.Start();
       console.log("Startup passed, initialising Bot");
+
+      let server = new API(this.mainDB, this.discord);
+      server.registerEndpoints();
    }
 }
