@@ -23,13 +23,32 @@ module.exports = class API {
          app.locals.discord.client.users.fetch(req.params.uuid).then(user => { 
             let isLogin = app.locals.listHelper.checkLoginForUser(user, req.params.loginKey);
             if(isLogin){
-               res.json(app.locals.listHelper.getAllForApi(user));
+               res.json({
+                  login: true,
+                  payload: app.locals.listHelper.getAllForApi(user)
+               });
             }else{
-               res.json({});
+               res.json({
+                  login: false
+               });
             }
          }).catch( error => {
             console.log(error);
             res.json({});
+         });
+      });
+   
+      //A KeepAlive Request to refresh the LoginKey
+      app.post('/keepAlive', function (req, res){
+         let uuid = req.body.uuid;
+         let loginKey = req.body.loginkey;
+         app.locals.discord.client.users.fetch(uuid).then(user => { 
+            let isLogin = app.locals.listHelper.checkLoginForUser(user, loginKey);
+            if(isLogin){
+               res.json({keepAlive : true});
+            }else{
+               res.json({keepAlive : false});
+            }
          });
       });
 

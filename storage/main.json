@@ -22,6 +22,6 @@
     }
   ],
   "listsLoginStoragePath": "storage/oneTimeLogin/",
-  "FrontFacingApiServerUrl": "https://alair.ps.hn/",
+  "FrontFacingApiServerUrl": "http://alair.ps.hn/",
   "port": 9999
 }

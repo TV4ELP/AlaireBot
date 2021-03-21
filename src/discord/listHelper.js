@@ -56,6 +56,7 @@ module.exports = class listHelper {
       if(fs.existsSync(userLoginPath)){
          let content =  fs.readFileSync(userLoginPath, 'ascii').trim();
          if (content == login.trim()){
+            fs.utimesSync(userLoginPath, new Date(), new Date()); //KeepAlive
             return true;
          }
       }
