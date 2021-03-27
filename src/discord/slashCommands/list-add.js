@@ -12,7 +12,7 @@ module.exports = class slashcommandListAdd {
 
    processSubGroup(){
       let addOptions = this.args.options;
-      let listName = null;
+      let listName = "default"; 
       let url = null;
       let imageName = null;
       addOptions.forEach(element => {
@@ -47,9 +47,12 @@ module.exports = class slashcommandListAdd {
          
             default:
                this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({data: {
-                  type: 5, //ACK a command without sending a message, showing the users input
-                  flags: 64 //ephemeral aka, only you can see it
-               }
+                     type: 4,
+                     data : {
+                        content : "Added Image to List: " + listName,
+                        flags: 64, //ephemeral aka, only you can see it
+                     }
+                  }
                });
                return; //Everything is fine. Go home
          }

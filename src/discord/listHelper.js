@@ -112,7 +112,11 @@ module.exports = class listHelper {
       if(database){
          database.defaults(
             {
-               images : []
+               images : [],
+               config : {
+                  source : null, 
+                  shared : []
+               }
             }
          ).write();
       }
@@ -241,7 +245,7 @@ module.exports = class listHelper {
       for(let i = 0; files.length > i; i++){
          let file = files[i];
          let name = file.slice(0,-5); //remove .json
-         let list = this.getDatabaseByname(name, user).get('images').value();
+         let list = this.getDatabaseByname(name, user).value();
          entries.push({[name] : list}); //in brackets so that js interpetes the variable and not takes the literal name         
       }
 

@@ -51,11 +51,14 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
             })
             this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({
                data: {
-                  type: 5
+                  type: 4,
+                  data : {
+                     content : response
+                  }
                }
             });
             
-            this.channel.send(response, {split : true});
+            //this.channel.send(response, {split : true}); we probably never need to split since we can only output 5 items anyways. 
          }
       });
    }
