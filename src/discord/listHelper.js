@@ -50,8 +50,7 @@ module.exports = class listHelper {
    }
 
    //Check if the supplied login Key is correct
-   checkLoginForUser(user, login){
-      const id = user.id;
+   checkLoginForUserId(id, login){
       const userLoginPath = this.loginPath + id + ".loginkey";
       if(fs.existsSync(userLoginPath)){
          let content =  fs.readFileSync(userLoginPath, 'ascii').trim();
@@ -62,6 +61,16 @@ module.exports = class listHelper {
       }
 
       return false;
+   }
+
+   //delete a single Image from the list
+   deleteItemFromListWithIndex(user, listName, index){
+      let list = this.getDatabaseByname(listName, user)
+      if(list){
+         //get the image array and remove by index
+         list.get('images').pullAt(index).write();
+      }
+      return true;
    }
    
    //Create New or Return existing List Folder plus Database for UserID
@@ -237,7 +246,7 @@ module.exports = class listHelper {
    }
 
 
-   getAllForApi(user){
+   getAllListsForApi(user){
       const id = user.id;
       const userStorage = this.storagePath + id;
       let files = fs.readdirSync(userStorage);
@@ -245,11 +254,21 @@ module.exports = class listHelper {
       for(let i = 0; files.length > i; i++){
          let file = files[i];
          let name = file.slice(0,-5); //remove .json
-         let list = this.getDatabaseByname(name, user).value();
-         entries.push({[name] : list}); //in brackets so that js interpetes the variable and not takes the literal name         
+         let db = this.getDatabaseByname(name, user);
+         if(db){
+            entries.push(name);    
+         }
       }
 
       return entries;
+   }
+
+   getSingleListForApi(user, listName){
+      let db = this.getDatabaseByname(listName, user);
+      if(db){
+         return db.value();
+      }
+      return null;
    }
 
    /*
