@@ -29,7 +29,7 @@ module.exports = class Discord {
    }
 
    RegisterNewCommands(){
-      this.client.api.applications(this.client.user.id).guilds('366942872219549697').commands.post({
+      this.client.api.applications(this.client.user.id).commands.post({
          data: {
             name: "list",
             description: "All the lists",
