@@ -121,7 +121,7 @@ module.exports.classObj = class BasicCommand {
 
    //Get all parameter from a message
    getParamsFromMessage(message, commandObj){
-      if(this.params == null){
+      if(this.params == undefined){
          //first lets remove the command from the content
          let content = message.content;
          content = content.replace(commandObj.command,'');

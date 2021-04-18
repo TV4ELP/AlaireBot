@@ -32,6 +32,7 @@ module.exports = class API {
             });  
          }
       });
+
       //Are you logged in
       //domain/:uuid/:loginKey
       app.get('/:uuid/:loginKey', function (req, res) {
@@ -63,6 +64,20 @@ module.exports = class API {
                res.json({
                   login: isLogin,
                   payload: app.locals.listHelper.getSingleListForApi(user, req.params.listName)
+               });
+            });  
+         }
+      });
+
+
+      //Get all the mutual Users
+      app.get('/:uuid/:loginKey/mutualUsers', function (req, res){
+         let isLogin = app.locals.listHelper.checkLoginForUserId(req.params.uuid, req.params.loginKey);
+         if(isLogin){
+            app.locals.discord.client.users.fetch(req.params.uuid).then(user => { 
+               res.json({
+                  login: isLogin,
+                  payload: JSON.stringify(app.locals.listHelper.allMutualUsers(user).array())
                });
             });  
          }

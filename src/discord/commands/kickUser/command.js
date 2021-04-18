@@ -15,8 +15,6 @@ module.exports.classObj = class KickUser extends BasicCommand{
 
    constructor(discord, eventData, user, database, params){
       super(discord, eventData, user, database, params); //call parent
-      this.duration = this.getTimeFromParams();
-      this.reason = this.getReasonFromParams();
    }
 
    execute(){
@@ -25,6 +23,9 @@ module.exports.classObj = class KickUser extends BasicCommand{
          this.event.channel.send('You dont have the Permissions needed')
          return false;
       }
+
+      this.duration = this.getTimeFromParams();
+      this.reason = this.getReasonFromParams();
 
       let mentions = this.getMentions();
       if(this.muteRoleId() == null){

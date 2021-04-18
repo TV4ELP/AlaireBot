@@ -63,6 +63,21 @@ module.exports = class listHelper {
       return false;
    }
 
+   //Get All Users which the User shares Servers with and we have access too 
+   allMutualUsers(user){
+      let allGuilds = this.discordClient.guilds.cache;
+      let users = new Map();
+      allGuilds.forEach( guild => {
+         let allGuildUsers = guild.members.cache;
+         if(allGuildUsers.has(user.id)){
+            //Merge them all together and generate a big list
+            users = new Map([users, allGuildUsers]);
+         }
+      });
+
+      return users;
+   }
+
    //delete a single Image from the list
    deleteItemFromListWithIndex(user, listName, index){
       let list = this.getDatabaseByname(listName, user)
