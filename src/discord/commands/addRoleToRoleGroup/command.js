@@ -1,7 +1,7 @@
 const BasicCommand = require('../basicCommand.js').classObj;
 
 const defaults = {
-   command : "/updateSubRolesForGroup",
+   command : "/subroles-update",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
@@ -9,7 +9,7 @@ const defaults = {
       'admin',
       'RoleManage'
    ],
-   params : '/updateSubRolesForGroup GroupName @role (one or multiple)'
+   params : 'Update which roles belong to a sub group \n USAGE: /subroles-update GroupName @role (one or multiple) \n If you use an existing Groupname you overwrite ALL subroles in that group!'
 };
 
 module.exports.defaults = defaults;
