@@ -2,14 +2,14 @@ const AddPermissionToRole = require('../addPermissionToRole/command').classObj;
 
 
 const defaults = {
-   command : "/removePermission",
+   command : "/permissions-remove",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [
       "admin"
    ],
-   params : '@User/@Role + Permission Name'
+   params : 'Remove a Permission from a USER or ROLE \n USAGE: /permission-remove @User/@Role  Permission-Name'
 };
 
 module.exports.defaults = defaults;

@@ -3,14 +3,14 @@ const DiscordJS = require('discord.js'); //For Embeds
 const URL = require("url").URL; //For checking if we get a link
 
 const defaults = {
-   command : "/permissions",
+   command : "/reaction-roles-embed",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [
       "admin"
    ],
-   params : 'optional: Message Link for Custom Message (rightclick on message and copy link)'
+   params : 'Create an Embed with all Emote/Role Pairs. Or add a Message Link to just add the Emotes to a Message (Rightklick Message -> Copy Link) \n USAGE: /reaction-roles-embed (optional) message-link'
 };
 
 module.exports.defaults = defaults;

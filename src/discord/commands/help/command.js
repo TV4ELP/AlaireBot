@@ -7,7 +7,7 @@ const defaults = {
    forcedStart : true,
    enabled : true,
    permissions : [],
-   params : ''
+   params : 'You are here'
 };
 
 module.exports.defaults = defaults;

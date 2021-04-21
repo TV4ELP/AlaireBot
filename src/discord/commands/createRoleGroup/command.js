@@ -1,7 +1,7 @@
 const BasicCommand = require('../basicCommand.js').classObj;
 
 const defaults = {
-   command : "/create Role Group",
+   command : "/rolegroup-create",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
@@ -9,7 +9,7 @@ const defaults = {
       'admin',
       'RoleManage'
    ],
-   params : '/createRoleGroup GroupName'
+   params : 'Create a new Group for Roles. Role Groups allow you to get a Master Group when granting yourself a subgroup \n USAGE: /rolegroup-create GroupName'
 };
 
 module.exports.defaults = defaults;

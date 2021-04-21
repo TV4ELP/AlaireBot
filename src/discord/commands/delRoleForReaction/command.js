@@ -2,14 +2,14 @@ const addRoleForReaction = require('../addRoleForReaction/command').classObj;
 
 
 const defaults = {
-   command : "/delRoleForReaction",
+   command : "/emote-for-role-delete",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [
       "admin"
    ],
-   params : '@Role or Emote which you want to remove'
+   params : 'Remove a Remote from the Reaction Function \n USAGE: /emote-for-role-delete @Role !OR! ServerEmote'
 };
 
 module.exports.defaults = defaults;

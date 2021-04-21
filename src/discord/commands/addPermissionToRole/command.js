@@ -2,14 +2,14 @@ const BasicCommand = require('../basicCommand.js').classObj;
 
 
 const defaults = {
-   command : "/addPermission",
+   command : "/permission-add",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [
       "admin"
    ],
-   params : '@User/@Role + Permission Name'
+   params : 'Add a Permission to a USER or ROLE \n USAGE: /permission-add @User/@Role  Permission-Name'
 };
 
 module.exports.defaults = defaults;

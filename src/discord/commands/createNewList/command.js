@@ -1,13 +1,13 @@
 const BasicCommand = require('../basicCommand.js').classObj;
 
 const defaults = {
-   command : "/list create new",
+   command : "/list-new",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
    global : true,
    permissions : [],
-   params : '/list create new listName** (can\'t contain spaces) **optional'
+   params : 'Create a new List \n USAGE: /list-new listName \n The Listname CAN\'T contain spaces. '
 };
 
 module.exports.defaults = defaults;

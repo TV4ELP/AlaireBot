@@ -12,13 +12,13 @@
       "params": "/list add name** URL (Omit URL if direct Upload) **Without a name it goes to the Default list"
     },
     {
-      "command": "/list create new",
+      "command": "/list-new",
       "filePath": "c:\\Users\\TeeFau\\Desktop\\AlaireBot\\src\\discord\\commands\\createNewList",
       "forcedStart": true,
       "enabled": true,
       "global": true,
       "permissions": [],
-      "params": "/list create new listName** (can't contain spaces) **optional"
+      "params": "Create a new List \n USAGE: /list-new listName \n The Listname CAN'T contain spaces. "
     }
   ],
   "listsLoginStoragePath": "storage/oneTimeLogin/",

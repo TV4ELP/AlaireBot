@@ -9,11 +9,11 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
  
    processSubGroup(){
 
-      let showOptions = this.args.options[0];
+      let showOptions = this.args.options;
       let listName = undefined;
       let count = undefined;
 
-      showOptions.options?.forEach(element => {
+      showOptions?.forEach(element => {
          if(element.name === 'listname'){
             listName = element.value;
          }
@@ -23,14 +23,12 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
          }
       });
 
-      if(showOptions.name == "random"){
-         if(!listName && !count){
-            this.respondWithDefaultRandomImage();
-            return;
-         }
-
-         this.respondWithCountImage(count, listName);
+      if(!listName && !count){
+         this.respondWithDefaultRandomImage();
+         return;
       }
+
+      this.respondWithCountImage(count, listName);
 
       if(showOptions.name == "by-name"){
 

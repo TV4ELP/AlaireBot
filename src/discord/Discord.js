@@ -37,53 +37,26 @@ module.exports = class Discord {
             options: [
                {
                   name: "get",
-                  description: "We want something back",
-                  type: 2, //subgroup
+                  description: "Post a random Image from your List (Without Listname it uses the default list)",
+                  type: 1,//subcommand
                   options: [
                      {
-                        name : "random",
-                        description : "it could be anything",
-                        type : 1,//subcommand
-                        options : [
-                           {
-                              name : "ListName",
-                              description : "What List shal it be from (empty for default)",
-                              type : 3, //string
-                              required : false
-                           },
-                           {
-                              name : "Count",
-                              description : "How Many pleb?",
-                              type : 4, //Int
-                              required : false
-                           }
-                        ] 
-                     }/* Don't use that currently,
+                        name : "ListName",
+                        description : "Omit this to use your default list. Check what lists you have with '/list collection'",
+                        type : 3, //string
+                        required : false
+                     },
                      {
-                        name : "by-name",
-                        description : "you know what you are searching for",
-                        type : 1,
-                        options : [
-                           {
-                              name : "ImageName",
-                              description : "How is it's precious name?",
-                              type : 3,
-                              required: true
-                              
-                           },
-                           {
-                              name : "ListName",
-                              description : "What List shal it be from (empty for default)",
-                              type : 3,
-                              required : false
-                           }
-                        ]
-                     }*/
+                        name : "Count",
+                        description : "How many images? Max 5. Omit for just one",
+                        type : 4, //Int
+                        required : false
+                     }
                   ]
                },
                {
                   name: "add",
-                  description: "Pls fill me up~",
+                  description: "Add a new Image to your list",
                   type :1, 
                   options:[
                      {
@@ -94,13 +67,13 @@ module.exports = class Discord {
                      },
                      {
                         name : "ImageName",
-                        description : "A name to find it better in the future?",
+                        description : "A name to hopefully find it again",
                         type : 3, //string
                         required : false
                      },
                      {
                         name : "ListName",
-                        description : "What List shal it be from (empty for default)",
+                        description : "Omit for your default list. Named Lists get created if they don't exist.",
                         type : 3, //string
                         required : false
                      }

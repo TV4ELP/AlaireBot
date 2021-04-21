@@ -2,14 +2,14 @@ const BasicCommand = require('../basicCommand.js').classObj;
 
 
 const defaults = {
-   command : "/addRoleForReaction",
+   command : "/emote-for-role",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
    permissions : [
       "admin"
    ],
-   params : '@Role + Emote from Server (Any the Bot is in, is fine)'
+   params : 'Set which Emote gives the User reacting to it which Role \n USAGE: /emote-for-role @Role + ServerEmote'
 };
 
 module.exports.defaults = defaults;

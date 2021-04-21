@@ -8,7 +8,7 @@ const defaults = {
    permissions : [
       "mute",
    ],
-   params : '@User + Time (1H = 1 Hour, 2M = 2 Minutes, 3S = 3 Seconds, 2H30M = 2 Hours and 30 Minutes)'
+   params : '"Kick" a User by giving him a Role that makes them unable to write in the Server \n USAGE: /kick @User + Time  \n (1H = 1 Hour, 2M = 2 Minutes, 3S = 3 Seconds, 2H30M = 2 Hours and 30 Minutes)'
 };
 module.exports.defaults = defaults;
 module.exports.classObj = class KickUser extends BasicCommand{

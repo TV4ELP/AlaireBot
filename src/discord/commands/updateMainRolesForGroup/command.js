@@ -1,7 +1,7 @@
 const BasicCommand = require('../basicCommand.js').classObj;
 
 const defaults = {
-   command : "/updateMainRolesForGroup",
+   command : "/mainroles-update",
    filePath : __dirname,
    forcedStart : true,
    enabled : true,
@@ -9,7 +9,7 @@ const defaults = {
       'admin',
       'RoleManage'
    ],
-   params : '/updateMainRolesForGroup GroupName @role (one or multiple)'
+   params : 'Update which Roles are the Master Roles in a Role Group \n /mainroles-update GroupName @role (one or multiple) \n This Overrides ALL Mainroles in that Role Group'
 };
 
 module.exports.defaults = defaults;
