@@ -191,7 +191,9 @@ module.exports = class listHelper {
       let retry = 0;
       for (;count > images.length && retry <= this.maxRetry;) {
          let singleImage = this.getRandomImage(user, dbName);
-
+         if(!image){
+            return null;
+         }
          let existent = images.some(element =>{
             return element.url == singleImage.url
          });

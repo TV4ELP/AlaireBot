@@ -92,6 +92,14 @@ module.exports = class Discord {
             ]
          }
       });
+
+      //Just print out the generic help here
+      this.client.api.applications(this.client.user.id).guilds('366942872219549697').commands.post({
+         data: {
+            name: "help",
+            description: "Some extra commands",
+         }
+      });
    }
 
 
@@ -126,7 +134,67 @@ module.exports = class Discord {
          if (command === 'list'){ 
             this.HandleListCommandInternal(interaction, args, userId, channel);
          }
+
+         if (command === 'help'){
+            this.client.users.fetch(userId).then(user => {
+               const allCommands = this.GetAllCommands();
+               let embed = this.createHelpEmbed(allCommands, interaction.guild_id, user);
+               this.client.api.interactions(interaction.id, interaction.token).callback.post({
+                  data: {
+                     type: 4,
+                     data : {
+                        embeds : [embed.toJSON()]
+                     }
+                  }
+               });
+            });
+            
+         }
       });
+   }
+
+
+   createHelpEmbed(commandList, guildId, member){
+      //First Create a message/embed we can react to
+      let embed = new DiscordJS.MessageEmbed();
+      embed.setTitle('You need help? I have help');
+      embed.setAuthor('Alaire', 'https://cdn.discordapp.com/avatars/586915769493880842/35e9c9874d02e256c5b702e003688937.png'); //Name, Icon
+      embed.setDescription('Here are all the commands i know');
+
+      let hiddenCounter = 0;
+      commandList.forEach(value =>{
+         if(!value.defaults.enabled || value.defaults.command == '') {
+            return;
+         }
+
+         let permissionArray = value.defaults.permissions;
+         let commandName = value.defaults.command;
+         let params = value.defaults.params;
+
+         //If we are not allowed, abort, but count it
+         const permissionsHelper = new permissionHelper(this, guildId, this.mainDB)
+         let allowed = permissionsHelper.isCommandAllowed(permissionArray, member);
+         if(allowed == false){
+            hiddenCounter ++;
+            return;
+         }
+         
+         if(params == ''){
+            params = "No input required";
+         }
+
+         if(permissionArray.length > 0){
+            commandName += " (Needed Permissions: " + permissionArray.toString() + ")"; 
+         }
+
+         embed.addField(commandName, params, false); //Title, Content, Inline 
+      });
+
+      if(hiddenCounter > 0){
+         embed.setFooter('You have missing permissions to see ' + hiddenCounter + ' additional Commands');
+      }
+      
+      return embed;
    }
 
    HandleListCommandInternal(interaction, args, userId, channel){

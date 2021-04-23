@@ -40,18 +40,26 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
 
       this.process.client.users.fetch(this.userId).then(user => {
          let image = listsHelper.getRandomImageCount(user, dbName, count);
+         let flag = 0;
          if(image != listHelper.ERROR_NO_DB){
             let response = "";
             let i = 1;
-            image.forEach(element => {
-               response += i + ": " + element.url + " \n";
-               i ++;
-            })
+            if(image){
+               image.forEach(element => {
+                  response += i + ": " + element.url + " \n";
+                  i ++;
+               });
+            }else{
+               response = "You have no image in this list";
+               flag = 64; //ephemeral aka, only you can see it
+            }
+            
             this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({
                data: {
                   type: 4,
                   data : {
-                     content : response
+                     content : response,
+                     flags : flag
                   }
                }
             });
@@ -67,18 +75,25 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
       this.process.client.users.fetch(this.userId).then(user => {
          
          let content;
+         let flag = 0;
          let image = listsHelper.getRandomImage(user);
          if(image == listHelper.ERROR_NO_DB){
             content = "Couldn't find a list with that name";
+         }
+
+         if(image){
+               content = image.url;
          }else{
-            content = image.url;
+            content = "You have 0 Images in this List";
+            flag = 64; //ephemeral aka, only you can see it
          }
 
          this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({
             data: {
                type: 4,
                data : {
-                  content: content
+                  content: content,
+                  flags : flag
                }
             }
          });
