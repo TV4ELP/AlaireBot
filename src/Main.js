@@ -53,8 +53,8 @@ module.exports = class Main {
       }
 
       if(db.get('FrontFacingApiServerUrl').value() == null){
-         db.set('FrontFacingApiServerUrl', 'https://alair.ps.hn/').write();
-         console.log("Front Facing Server is set to: https://alair.ps.hn/");
+         db.set('FrontFacingApiServerUrl', 'https://kalamos.ps.hn/').write();
+         console.log("Front Facing Server is set to: https://kalamos.ps.hn/");
          
       }
 

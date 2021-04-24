@@ -2,6 +2,7 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
 const crypto = require('crypto');
+const { Collection } = require('discord.js');
 
 module.exports = class listHelper {
    //Error Types
@@ -66,15 +67,16 @@ module.exports = class listHelper {
    //Get All Users which the User shares Servers with and we have access too 
    allMutualUsers(user){
       let allGuilds = this.discordClient.guilds.cache;
-      let users = new Map();
+      let users = new Collection();
       allGuilds.forEach( guild => {
          let allGuildUsers = guild.members.cache;
          if(allGuildUsers.has(user.id)){
             //Merge them all together and generate a big list
-            users = new Map([users, allGuildUsers]);
+            users = users.concat(allGuildUsers);
          }
       });
-
+      //Delete yourself out of this list
+      users.delete(user.id);
       return users;
    }
 
@@ -191,9 +193,15 @@ module.exports = class listHelper {
       let retry = 0;
       for (;count > images.length && retry <= this.maxRetry;) {
          let singleImage = this.getRandomImage(user, dbName);
-         if(!image){
+         if(!singleImage){
             return null;
          }
+
+         //Tell em we have no db
+         if(singleImage == listHelper.ERROR_NO_DB){
+            return singleImage;
+         }
+
          let existent = images.some(element =>{
             return element.url == singleImage.url
          });
@@ -237,17 +245,36 @@ module.exports = class listHelper {
    //Get All Lists in a nice Format
    //
    //
-   getAllLists(user){
+   getAllLists(user, filterPublic = false, prettyPrint = false){
       const id = user.id;
       const userStorage = this.storagePath + id;
+      if(fs.existsSync(userStorage) == false){
+         return null;
+      }
       let files = fs.readdirSync(userStorage);
       let entries = Array();
       for(let i = 0; files.length > i; i++){
          let file = files[i];
          let name = file.slice(0,-5); //remove .json
-         let imageCount = this.getDatabaseByname(name, user).get('images').value().length;
-         let resObj =  {name : name, count : imageCount};
-         entries.push(resObj);               
+         let db = this.getDatabaseByname(name, user);
+         let imageCount = db.get('images').value().length
+         let resObj =  {name : name, count : imageCount, isPublic : false};
+         let isPublic = db.get('config').get('public').value();
+
+
+         resObj.isPublic = isPublic;
+
+         if(filterPublic){
+            if(isPublic){
+               entries.push(resObj);
+            }
+         }else{
+            entries.push(resObj);               
+         }
+      }
+
+      if(filterPublic && prettyPrint == false){
+         return entries;
       }
 
       if(entries.length == 0){
@@ -256,7 +283,11 @@ module.exports = class listHelper {
 
       let string = "__Behold thy lists__ \n";
       entries.forEach(element => {
+         if(element.isPublic){
+            string += "**" + element.name + " (" + element.count + " images) -PUBLIC- **\n";
+         }else{
          string += "**" + element.name + " (" + element.count + " images)**\n";
+         }
       });
 
       return string;
@@ -288,6 +319,57 @@ module.exports = class listHelper {
       return null;
    }
 
+
+   //Get All Lists from every User that has the Public flag set
+   //We only can use the ones from users in the current guild tho
+   getAllPublicLists(guildId){
+      let guild = this.discordClient.guilds.cache.get(guildId);
+      let allGuildUsers = guild.members.cache;
+
+
+      let publicLists = [];
+
+      allGuildUsers.each(member => {
+         let user = member.user;
+         let allLists = this.getAllLists(user, true);
+         if(allLists != null){
+            publicLists.push({member : [member], lists : allLists});
+         }
+      });
+
+      return publicLists;
+   }
+
+   //If a Listisalready Public, we can not do that
+   isListAlreadyPublic(guildId, listName){
+      let userIdAndListArrayArray = this.getAllPublicLists(guildId);
+      let isPublic = false;
+      userIdAndListArrayArray.forEach(listNameArray => {
+         let member = listNameArray.member;
+         let lists = listNameArray.lists;
+         lists.forEach(listItem => {
+            if(listItem.name.toLowerCase() == listName.toLowerCase()){
+               isPublic = true;
+            }
+         })
+      });
+
+      return isPublic;
+   }
+
+
+   makeListPublic(listname, userid){
+      let db = this.getDatabaseByname(listname, userid);
+      if(!db){
+         return false;
+      }
+
+      if(db.get('config').value() == null){
+         db.set('config', {}).write();
+      }
+      db.get('config').set('public', true).write();
+      return true;
+   }
    /*
    //PLS DELETE ON End of March 2021 if no Use is found
    getAllImages(user, dbName){

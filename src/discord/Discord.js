@@ -47,6 +47,12 @@ module.exports = class Discord {
                         required : false
                      },
                      {
+                        name : "User",
+                        description : "OPTIONAL: The User you want to get the list from (if it is public)",
+                        type : 6, //Dis a user
+                        required : false
+                     },
+                     {
                         name : "Count",
                         description : "How many images? Max 5. Omit for just one",
                         type : 4, //Int
@@ -81,20 +87,41 @@ module.exports = class Discord {
                },
                {
                   name: "collection",
-                  description: "Let me show you all of your lists",
-                  type: 1 //subcommand
+                  description: "Let me show you all the lists",
+                  type: 1, //subcommand
+                  options: [
+                     {
+                        name : "User",
+                        description : "OPTIONAL: The User you want to get the list from (if it is public)",
+                        type : 6, //Dis a user
+                        required : false
+                     }
+                  ]
                },
                {
                   name: "manage",
                   description: "Managing is hard, this makes it easy",
                   type: 1 //subcommand
+               },
+               {
+                  name: "make-public",
+                  description: "Make your list publicly available for everyone to see",
+                  type: 1, //subcommand
+                  options: [
+                     {
+                        name : "ListName",
+                        description : "Check what lists you have with '/list collection'",
+                        type : 3, //string
+                        required : true
+                     }
+                  ]
                }
             ]
          }
       });
 
       //Just print out the generic help here
-      this.client.api.applications(this.client.user.id).guilds('366942872219549697').commands.post({
+      this.client.api.applications(this.client.user.id).commands.post({
          data: {
             name: "help",
             description: "Some extra commands",
@@ -224,6 +251,14 @@ module.exports = class Discord {
          let slashcommandManageObj = new(require("./slashCommands/list-manage"))(this, interaction, subGroup, userId, channel);
          slashcommandManageObj.processSubGroup();           
       }
+
+      if(subGroup.name === 'make-public'){
+         let slashcommandShare = new(require("./slashCommands/list-make-public"))(this, interaction, subGroup, userId, channel);
+         slashcommandShare.processSubGroup();           
+      }
+
+
+      
    }
    
 
