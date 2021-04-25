@@ -109,6 +109,7 @@ module.exports = class permissionHelper {
    //If applicable check for any roleGroups
    userDelRole(roleId, user){
       let userRoleManager = user.roles;
+      userRoleManager.remove(roleId);
       let roleCache = userRoleManager.cache;
       let additionalRoles = this.getRoleHelper().findAdditionalRolesInGroups(roleId);
       //check if we have enough roles to stay in this group
@@ -130,7 +131,7 @@ module.exports = class permissionHelper {
          }
       });
 
-      userRoleManager.remove(roleId);
+      
    }
 
    userHasPermission(permissionNameString, user){
