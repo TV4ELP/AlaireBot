@@ -3,7 +3,7 @@ const AddRoleForReaction = require('../addRoleForReaction/command').classObj;
 
 const defaults = {
    command : "",
-   filePath : "reactionAddRole.js",
+   filePath : __dirname,
    forcedStart : false,
    enabled : true,
    permissions : []

@@ -109,29 +109,28 @@ module.exports = class permissionHelper {
    //If applicable check for any roleGroups
    userDelRole(roleId, user){
       let userRoleManager = user.roles;
-      userRoleManager.remove(roleId);
-      let roleCache = userRoleManager.cache;
-      let additionalRoles = this.getRoleHelper().findAdditionalRolesInGroups(roleId);
-      //check if we have enough roles to stay in this group
-      additionalRoles.forEach(roleObject => {
-         let subRoles = roleObject.subRoles;
-         let groupStillValid = false;
-         subRoles.forEach(subRoleId => {
-            if(roleCache.has(subRoleId)){
-               groupStillValid = true;
+      userRoleManager.remove(roleId).then( () => {
+         let roleCache = userRoleManager.cache;
+         let additionalRoles = this.getRoleHelper().findAdditionalRolesInGroups(roleId);
+         //check if we have enough roles to stay in this group
+         additionalRoles.forEach(roleObject => {
+            let subRoles = roleObject.subRoles;
+            let groupStillValid = false;
+            subRoles.forEach(subRoleId => {
+               if(roleCache.has(subRoleId)){
+                  groupStillValid = true;
+               }
+            });
+   
+            //Group is not Valid. We need to all main roles it
+            if(groupStillValid == false){
+               let mainRoles = roleObject.mainRoles;
+               mainRoles.forEach(mainRoleId => {
+                  userRoleManager.remove(mainRoleId);
+               });
             }
          });
-
-         //Group is not Valid. We need to all main roles it
-         if(groupStillValid == false){
-            let mainRoles = roleObject.mainRoles;
-            mainRoles.forEach(mainRoleId => {
-               userRoleManager.remove(mainRoleId);
-            });
-         }
-      });
-
-      
+      });      
    }
 
    userHasPermission(permissionNameString, user){
