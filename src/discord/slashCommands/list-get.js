@@ -29,7 +29,7 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
       });
 
       if(!listName && !count){
-         this.respondWithDefaultRandomImage(userId);
+         this.respondWithDefaultRandomImage();
          return;
       }
 
@@ -115,15 +115,16 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
          let flag = 0;
          let image = listsHelper.getRandomImage(user);
          if(image == listHelper.ERROR_NO_DB){
-            content = "Couldn't find a list with that name";
-         }
-
-         if(image){
-               content = image.url;
+            content = "You don't have any lists yet";
          }else{
-            content = "You have 0 Images in this List";
-            flag = 64; //ephemeral aka, only you can see it
+            if(image == undefined){
+               content = "You have 0 Images in the default List";
+               flag = 64; //ephemeral aka, only you can see it
+            }else{
+               content = image.url;
+            }
          }
+         
 
          this.process.client.api.interactions(this.interaction.id, this.interaction.token).callback.post({
             data: {
