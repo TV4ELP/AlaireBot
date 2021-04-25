@@ -26,7 +26,7 @@ module.exports.classObj = class help extends BasicCommand{
       
       //Gotta need all Commands to Help ya find what you need
       const allCommands = this.discord.GetAllCommands();
-      let message = this.createHelpEmbed(allCommands, this.getGuildFromMessage().id, this.event.member);
+      let message = this.discord.createHelpEmbed(allCommands, this.getGuildFromMessage().id, this.event.member);
 
       this.event.channel.send(message);
    }
