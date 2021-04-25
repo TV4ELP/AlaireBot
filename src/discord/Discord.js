@@ -7,6 +7,7 @@ const reactionHelper = require('./reactionHelper');
 const roleHelper = require('./roleHelper');
 const kickWatcher = require('./watcher/kickWatcher');
 const loginWatcher = require('./watcher/loginWatcher');
+const listHelper = require('./listHelper');
 
 module.exports = class Discord {
    constructor(db){
@@ -72,16 +73,29 @@ module.exports = class Discord {
                         required : true
                      },
                      {
-                        name : "ImageName",
-                        description : "A name to hopefully find it again",
-                        type : 3, //string
-                        required : false
-                     },
-                     {
                         name : "ListName",
                         description : "Omit for your default list. Named Lists get created if they don't exist.",
                         type : 3, //string
                         required : false
+                     },
+                     {
+                        name : "ImageName",
+                        description : "A name to hopefully find it again",
+                        type : 3, //string
+                        required : false
+                     }
+                  ]
+               },
+               {
+                  name: "new",
+                  description: "Create a new Empty List",
+                  type: 1, //subcommand
+                  options: [
+                     {
+                        name : "ListName",
+                        description : "The Name",
+                        type : 3, //string
+                        required : true
                      }
                   ]
                },
@@ -119,13 +133,55 @@ module.exports = class Discord {
             ]
          }
       });
+   }
 
-      //Just print out the generic help here
-      this.client.api.applications(this.client.user.id).commands.post({
-         data: {
-            name: "help",
-            description: "Some extra commands",
-         }
+   GuildSpecificCommands(){
+
+      let guilds = this.GetAllGuilds();
+
+      guilds.each((guild) => {
+         this.UpdateSingleGuildListRanking(guild.id);
+      });
+   }
+
+   UpdateSingleGuildListRanking(guildId){
+      let listsHelper = new listHelper(this, this.mainDB);
+      this.client.guilds.fetch(guildId, true, true).then( (fetchedGuild) => {
+         let choicesArray = Array();
+         let members = fetchedGuild.members.cache;
+         let allLists = Array();
+
+         members.forEach(guildMember => {
+            let lists = listsHelper.getAllLists(guildMember.user, true);
+            lists?.forEach(listElement => {
+               allLists.push({name : listElement.name, count : listElement.count});
+            });
+         });
+
+         allLists.sort((a,b) => (a.count > b.count) ? -1 : ((b.count > a.count) ? 1 : 0))
+         let count = 0;
+         allLists.forEach(listElement => {
+            if(count < 25){
+               choicesArray.push({name : listElement.name + " - " + " used " + listElement.count + " times", value : listElement.name});
+               count ++;
+            }
+         });
+
+         this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
+            data: {
+               name: "list-public",
+               description: "Direct access to the top Public Lists",
+               options: [
+                  {
+                      name: "Name",
+                      description: "The name of the list",
+                      type: 3,
+                      required: true,
+                      choices: choicesArray
+                  }
+               ]
+            }
+         });
       });
    }
 
@@ -140,6 +196,8 @@ module.exports = class Discord {
          });
          this.RegisterNewCommands();
       });
+      
+      this.GuildSpecificCommands();
 
       this.HandleInterActionEvents();
    }
@@ -158,8 +216,13 @@ module.exports = class Discord {
          }
          const channel = this.client.channels.cache.get(interaction.channel_id);
 
-         if (command === 'list'){ 
+         if (command === 'list' ){ 
             this.HandleListCommandInternal(interaction, args, userId, channel);
+         }
+
+         if (command === 'list-public' ){ 
+            let slashcommandListGetPublic = new(require("./slashCommands/public-get"))(this, interaction, args, userId, channel);
+            slashcommandListGetPublic.processSubGroup();
          }
 
          if (command === 'help'){
@@ -257,7 +320,12 @@ module.exports = class Discord {
          slashcommandShare.processSubGroup();           
       }
 
+      if(subGroup.name === 'new'){
+         let slashcommandNew= new(require("./slashCommands/list-new"))(this, interaction, subGroup, userId, channel);
+         slashcommandNew.processSubGroup();           
+      }
 
+      
       
    }
    

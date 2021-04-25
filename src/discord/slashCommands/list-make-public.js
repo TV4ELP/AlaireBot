@@ -2,7 +2,7 @@ const listHelper = require("../listHelper");
 const slashcommandListAdd = require("./list-add");
 const DiscordJS = require('discord.js');
 
-module.exports = class slashcommandListGet extends slashcommandListAdd {
+module.exports = class slashcommandListMakePublic extends slashcommandListAdd {
 
    constructor(process, interaction, args, userId, channel){
       super(process, interaction, args, userId, channel)
@@ -44,6 +44,7 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
                text = "You have no list with that name";
             }else{
                text = "made your list public"
+               this.process.UpdateSingleGuildListRanking(this.interaction.guild_id);
             }
             new DiscordJS.WebhookClient(this.process.client.user.id, this.interaction.token).send(text);
          }); 

@@ -51,8 +51,11 @@ module.exports = class slashcommandShowLists extends slashcommandListAdd{
 
    showLists(listsHelper){
       this.process.client.users.fetch(this.userId).then(user => {
-         let lists = listsHelper.getAllLists(user);
-         new DiscordJS.WebhookClient(this.process.client.user.id, this.interaction.token).send(lists);
+         let yourLists = listsHelper.getAllLists(user, false, true);
+         let publiclists = listsHelper.getAllPublicLists(this.interaction.guild_id,true, user.id);
+
+         let content = "\n **Your Lists:** \n" + yourLists + "\n **Public Lists:** \n" + publiclists; 
+         new DiscordJS.WebhookClient(this.process.client.user.id, this.interaction.token).send(content);
       });
    }
 }

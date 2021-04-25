@@ -217,6 +217,22 @@ module.exports = class listHelper {
       return images;
    }
 
+   incrementListCounter(user, dbName){
+      let db = this.getDatabaseByname(dbName, user);
+      if(!db){
+         return listHelper.ERROR_NO_DB;
+      }
+
+      let currentCount = db.get('config').get('count').value();
+      if(!currentCount){
+         currentCount = 0;
+      }
+
+      currentCount ++;
+
+      db.get('config').set('count', currentCount).write();
+   }
+
    //Do a lazy search
    //Try to get an Image which is close to the name
    //
@@ -245,7 +261,7 @@ module.exports = class listHelper {
    //Get All Lists in a nice Format
    //
    //
-   getAllLists(user, filterPublic = false, prettyPrint = false){
+   getAllLists(user, filterPublic = false, prettyPrint = false, member = null){
       const id = user.id;
       const userStorage = this.storagePath + id;
       if(fs.existsSync(userStorage) == false){
@@ -258,11 +274,15 @@ module.exports = class listHelper {
          let name = file.slice(0,-5); //remove .json
          let db = this.getDatabaseByname(name, user);
          let imageCount = db.get('images').value().length
-         let resObj =  {name : name, count : imageCount, isPublic : false};
+         let resObj =  {name : name, imgcount : imageCount, isPublic : false, count : 0};
          let isPublic = db.get('config').get('public').value();
-
+         let count = db.get('config').get('count').value();
 
          resObj.isPublic = isPublic;
+
+         if(count){
+            resObj.count = count;
+         }
 
          if(filterPublic){
             if(isPublic){
@@ -281,12 +301,18 @@ module.exports = class listHelper {
          return "You don't have any lists yet";
       }
 
-      let string = "__Behold thy lists__ \n";
+      let string = "";
+
+      let displayName = "";
+      if(member){
+         displayName = member.displayName + ": ";
+      }
+
       entries.forEach(element => {
          if(element.isPublic){
-            string += "**" + element.name + " (" + element.count + " images) -PUBLIC- **\n";
+            string += "**" + displayName  + element.name + " (" + element.imgcount + " images) -PUBLIC- **\n";
          }else{
-         string += "**" + element.name + " (" + element.count + " images)**\n";
+            string += "**" + displayName  + element.name + " (" + element.imgcount + " images)**\n";
          }
       });
 
@@ -322,21 +348,29 @@ module.exports = class listHelper {
 
    //Get All Lists from every User that has the Public flag set
    //We only can use the ones from users in the current guild tho
-   getAllPublicLists(guildId){
+   getAllPublicLists(guildId, prettyPrint = false, userId = 0){
       let guild = this.discordClient.guilds.cache.get(guildId);
       let allGuildUsers = guild.members.cache;
 
 
       let publicLists = [];
-
+      let content = "";
       allGuildUsers.each(member => {
          let user = member.user;
-         let allLists = this.getAllLists(user, true);
+         let allLists = this.getAllLists(user, true, prettyPrint, member);
+         
          if(allLists != null){
-            publicLists.push({member : [member], lists : allLists});
+            if(prettyPrint){
+               content += allLists;
+            }else{
+               publicLists.push({member : [member], lists : allLists});
+            }
          }
       });
 
+      if(prettyPrint){
+         return content;
+      }
       return publicLists;
    }
 
@@ -345,7 +379,6 @@ module.exports = class listHelper {
       let userIdAndListArrayArray = this.getAllPublicLists(guildId);
       let isPublic = false;
       userIdAndListArrayArray.forEach(listNameArray => {
-         let member = listNameArray.member;
          let lists = listNameArray.lists;
          lists.forEach(listItem => {
             if(listItem.name.toLowerCase() == listName.toLowerCase()){

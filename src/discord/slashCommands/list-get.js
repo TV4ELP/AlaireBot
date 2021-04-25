@@ -73,6 +73,10 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
             let response = "";
             let i = 1;
             if(image){
+               if(isForeignList){
+                  listsHelper.incrementListCounter(user, dbName);
+                  this.process.UpdateSingleGuildListRanking(this.interaction.guild_id);
+               }
                image.forEach(element => {
                   response += i + ": " + element.url + " \n";
                   i ++;
@@ -116,6 +120,7 @@ module.exports = class slashcommandListGet extends slashcommandListAdd {
          let image = listsHelper.getRandomImage(user);
          if(image == listHelper.ERROR_NO_DB){
             content = "You don't have any lists yet";
+            flag = 64;
          }else{
             if(image == undefined){
                content = "You have 0 Images in the default List";
