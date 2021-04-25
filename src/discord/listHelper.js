@@ -183,9 +183,26 @@ module.exports = class listHelper {
       if(!db){
          return listHelper.ERROR_NO_DB;
       }
+      
       let images = db.get('images').value();
       let singleObj = images[Math.floor(Math.random() * images.length)];
       return singleObj;
+   }
+
+
+   getUserFromListAndGuild(guildId, dbName){
+      let publicLists = this.getAllPublicLists(guildId);
+      let member = null;
+      publicLists.forEach(listNameArray => {
+         let lists = listNameArray.lists;
+         lists.forEach(listItem => {
+            if(listItem.name.toLowerCase() == dbName.toLowerCase()){
+               member =  listNameArray.member[0];
+            }
+         })
+      });
+
+      return member;
    }
 
    getRandomImageCount(user, dbName, count){

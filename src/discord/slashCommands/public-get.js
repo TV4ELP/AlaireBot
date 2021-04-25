@@ -24,19 +24,18 @@ module.exports = class slashcommandListGetPublic extends slashcommandListAdd {
       
       let listsHelper = new listHelper(this.process.client, this.process.mainDB);
 
-      this.process.client.users.fetch(this.userId).then(user => {
-         let text = "";
-         let image = listsHelper.getRandomImage(user, listName);
-         if(image){
-            text = image.url;
-            listsHelper.incrementListCounter(user, listName);
-            this.process.UpdateSingleGuildListRanking(this.interaction.guild_id);
-         }else{
-            text = "There are currently no images in that List"
-         }
-         
-         new DiscordJS.WebhookClient(this.process.client.user.id, this.interaction.token).send(text);
-      }); 
+      let text = "";
+      let member = listsHelper.getUserFromListAndGuild(this.interaction.guild_id, listName);
+      let image = listsHelper.getRandomImage(member.user, listName);
+      if(image){
+         text = image.url;
+         listsHelper.incrementListCounter(member.user, listName);
+         this.process.UpdateSingleGuildListRanking(this.interaction.guild_id);
+      }else{
+         text = "There are currently no images in that List"
+      }
+      
+      new DiscordJS.WebhookClient(this.process.client.user.id, this.interaction.token).send(text);
    }
 
 }
