@@ -32,7 +32,7 @@ module.exports = class Discord {
    RegisterNewCommands(){
       this.client.api.applications(this.client.user.id).commands.post({
          data: {
-            name: "list",
+            name: "l",
             description: "All the lists",
             // possible options here e.g. options: [{...}]
             options: [
@@ -169,7 +169,7 @@ module.exports = class Discord {
 
          this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
             data: {
-               name: "list-public",
+               name: "r",
                description: "Direct access to the top Public Lists",
                options: [
                   {
@@ -216,11 +216,11 @@ module.exports = class Discord {
          }
          const channel = this.client.channels.cache.get(interaction.channel_id);
 
-         if (command === 'list' ){ 
+         if (command === 'l' ){ 
             this.HandleListCommandInternal(interaction, args, userId, channel);
          }
 
-         if (command === 'list-public' ){ 
+         if (command === 'r' ){ 
             let slashcommandListGetPublic = new(require("./slashCommands/public-get"))(this, interaction, args, userId, channel);
             slashcommandListGetPublic.processSubGroup();
          }

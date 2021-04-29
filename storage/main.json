@@ -22,6 +22,6 @@
     }
   ],
   "listsLoginStoragePath": "storage/oneTimeLogin/",
-  "FrontFacingApiServerUrl": "https://alair.ps.hn/",
+  "FrontFacingApiServerUrl": "https://kalamos.ps.hn/",
   "port": 9999
 }
