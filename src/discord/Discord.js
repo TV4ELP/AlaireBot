@@ -32,7 +32,7 @@ module.exports = class Discord {
    RegisterNewCommands(){
       this.client.api.applications(this.client.user.id).commands.post({
          data: {
-            name: "l",
+            name: "list",
             description: "All the lists",
             // possible options here e.g. options: [{...}]
             options: [
@@ -167,20 +167,28 @@ module.exports = class Discord {
             }
          });
 
-         this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
-            data: {
-               name: "r",
-               description: "Direct access to the top Public Lists",
-               options: [
-                  {
-                      name: "Name",
-                      description: "The name of the list",
-                      type: 3,
-                      required: true,
-                      choices: choicesArray
-                  }
-               ]
-            }
+         let commandPromise = this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands().get();
+         commandPromise.then(list => {
+            list.forEach(element => {
+               let commandId = element.id;
+               this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands(commandId).delete();
+            });
+
+            this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
+               data: {
+                  name: "r",
+                  description: "Direct access to the top Public Lists",
+                  options: [
+                     {
+                         name: "Name",
+                         description: "The name of the list",
+                         type: 3,
+                         required: true,
+                         choices: choicesArray
+                     }
+                  ]
+               }
+            });
          });
       });
    }
@@ -196,7 +204,7 @@ module.exports = class Discord {
          });
          this.RegisterNewCommands();
       });
-      
+     
       this.GuildSpecificCommands();
 
       this.HandleInterActionEvents();
@@ -216,7 +224,7 @@ module.exports = class Discord {
          }
          const channel = this.client.channels.cache.get(interaction.channel_id);
 
-         if (command === 'l' ){ 
+         if (command === 'list' ){ 
             this.HandleListCommandInternal(interaction, args, userId, channel);
          }
 
