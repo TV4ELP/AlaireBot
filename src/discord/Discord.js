@@ -170,7 +170,7 @@ module.exports = class Discord {
          let commandPromise = this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands().get();
          commandPromise.then(list => {
             //delete if needed
-            if(count(list) > 0){
+            if(list.length > 0){
                list.forEach(element => {
                   let commandId = element.id;
                   this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands(commandId).delete().then( () => {
