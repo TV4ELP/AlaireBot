@@ -171,23 +171,23 @@ module.exports = class Discord {
          commandPromise.then(list => {
             list.forEach(element => {
                let commandId = element.id;
-               this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands(commandId).delete();
-            });
-
-            this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
-               data: {
-                  name: "r",
-                  description: "Direct access to the top Public Lists",
-                  options: [
-                     {
-                         name: "Name",
-                         description: "The name of the list",
-                         type: 3,
-                         required: true,
-                         choices: choicesArray
+               this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands(commandId).delete().then( () => {
+                  this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
+                     data: {
+                        name: "r",
+                        description: "Direct access to the top Public Lists",
+                        options: [
+                           {
+                               name: "Name",
+                               description: "The name of the list",
+                               type: 3,
+                               required: true,
+                               choices: choicesArray
+                           }
+                        ]
                      }
-                  ]
-               }
+                  });
+               });
             });
          });
       });
