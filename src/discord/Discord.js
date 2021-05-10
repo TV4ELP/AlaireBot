@@ -42,19 +42,19 @@ module.exports = class Discord {
                   type: 1,//subcommand
                   options: [
                      {
-                        name : "ListName",
+                        name : "listname",
                         description : "Omit this to use your default list. Check what lists you have with '/list collection'",
                         type : 3, //string
                         required : false
                      },
                      {
-                        name : "User",
+                        name : "user",
                         description : "OPTIONAL: The User you want to get the list from (if it is public)",
                         type : 6, //Dis a user
                         required : false
                      },
                      {
-                        name : "Count",
+                        name : "count",
                         description : "How many images? Max 5. Omit for just one",
                         type : 4, //Int
                         required : false
@@ -67,19 +67,19 @@ module.exports = class Discord {
                   type :1, 
                   options:[
                      {
-                        name : "URL",
+                        name : "url",
                         description : "The Image Link Please",
                         type : 3, //string
                         required : true
                      },
                      {
-                        name : "ListName",
+                        name : "listname",
                         description : "Omit for your default list. Named Lists get created if they don't exist.",
                         type : 3, //string
                         required : false
                      },
                      {
-                        name : "ImageName",
+                        name : "imagename",
                         description : "A name to hopefully find it again",
                         type : 3, //string
                         required : false
@@ -92,7 +92,7 @@ module.exports = class Discord {
                   type: 1, //subcommand
                   options: [
                      {
-                        name : "ListName",
+                        name : "listname",
                         description : "The Name",
                         type : 3, //string
                         required : true
@@ -105,7 +105,7 @@ module.exports = class Discord {
                   type: 1, //subcommand
                   options: [
                      {
-                        name : "User",
+                        name : "user",
                         description : "OPTIONAL: The User you want to get the list from (if it is public)",
                         type : 6, //Dis a user
                         required : false
@@ -123,7 +123,7 @@ module.exports = class Discord {
                   type: 1, //subcommand
                   options: [
                      {
-                        name : "ListName",
+                        name : "listname",
                         description : "Check what lists you have with '/list collection'",
                         type : 3, //string
                         required : true
@@ -181,7 +181,7 @@ module.exports = class Discord {
                            description: "Direct access to the top Public Lists",
                            options: [
                               {
-                                  name: "Name",
+                                  name: "name",
                                   description: "The name of the list",
                                   type: 3,
                                   required: true,
@@ -199,7 +199,7 @@ module.exports = class Discord {
                      description: "Direct access to the top Public Lists",
                      options: [
                         {
-                            name: "Name",
+                            name: "name",
                             description: "The name of the list",
                             type: 3,
                             required: true,
