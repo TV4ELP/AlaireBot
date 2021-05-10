@@ -217,10 +217,10 @@ module.exports = class Discord {
    UpdateSlashCommands(){
       let commandPromise = this.RemoveCommands();
 
-      commandPromise.then(list => {
+      commandPromise.then(async list => {
          list.forEach(element => {
             let commandId = element.id;
-            this.client.api.applications(this.client.user.id).commands(commandId).delete();
+            await this.client.api.applications(this.client.user.id).commands(commandId).delete();
          });
          this.RegisterNewCommands();
       });
