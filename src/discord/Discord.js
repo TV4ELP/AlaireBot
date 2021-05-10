@@ -162,7 +162,8 @@ module.exports = class Discord {
          let count = 0;
          allLists.forEach(listElement => {
             if(count < 25){
-               choicesArray.push({name : listElement.name + " - " + " used " + listElement.count + " times", value : listElement.name});
+               let listelementName = listElement.name.split(' ').join('_');
+               choicesArray.push({name : listelementName + " - " + " used " + listElement.count + " times", value : listElement.name});
                count ++;
             }
          });
