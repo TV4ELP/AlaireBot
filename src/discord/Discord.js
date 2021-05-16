@@ -29,8 +29,8 @@ module.exports = class Discord {
       login.watch();
    }
 
-   RegisterNewCommands(){
-      this.client.api.applications(this.client.user.id).commands.post({
+   RegisterNewCommands(guildid){
+      this.client.api.applications(this.client.user.id).guilds(guildid).commands.post({
          data: {
             name: "list",
             description: "All the lists",
@@ -140,74 +140,65 @@ module.exports = class Discord {
       let guilds = this.GetAllGuilds();
 
       guilds.each((guild) => {
+         //Delete all things
+         let commandPromise = this.client.api.applications(this.client.user.id).guilds(guild.id).commands().get();
+         commandPromise.then(list => {
+            list.forEach(async element => {
+               let commandId = element.id;
+               await this.client.api.applications(this.client.user.id).commands(commandId).delete();
+            });
+         });
+
+         //this.RegisterNewCommands(guild.id);
+
          this.UpdateSingleGuildListRanking(guild.id);
       });
    }
 
-   UpdateSingleGuildListRanking(guildId){
+
+   async buildChoicesForGuild(fetchedGuild){
+      let choicesArray = Array();
+      let members = fetchedGuild.members.cache;
+      let allLists = Array();
       let listsHelper = new listHelper(this, this.mainDB);
-      this.client.guilds.fetch(guildId, true, true).then( (fetchedGuild) => {
-         let choicesArray = Array();
-         let members = fetchedGuild.members.cache;
-         let allLists = Array();
 
-         members.forEach(guildMember => {
-            let lists = listsHelper.getAllLists(guildMember.user, true);
-            lists?.forEach(listElement => {
-               allLists.push({name : listElement.name, count : listElement.count});
-            });
+
+      members.forEach(guildMember => {
+         let lists = listsHelper.getAllLists(guildMember.user, true);
+         lists?.forEach(listElement => {
+            allLists.push({name : listElement.name, count : listElement.count});
          });
+      });
 
-         allLists.sort((a,b) => (a.count > b.count) ? -1 : ((b.count > a.count) ? 1 : 0))
-         let count = 0;
-         allLists.forEach(listElement => {
-            if(count < 25){
-               let listelementName = listElement.name.split(' ').join('_');
-               choicesArray.push({name : listelementName + " - " + " used " + listElement.count + " times", value : listElement.name});
-               count ++;
-            }
-         });
+      allLists.sort((a,b) => (a.count > b.count) ? -1 : ((b.count > a.count) ? 1 : 0))
+      let count = 0;
+      allLists.forEach(listElement => {
+         if(count < 25){
+            let listelementName = listElement.name.split(' ').join('_');
+            choicesArray.push({name : listelementName + " - " + " used " + listElement.count + " times", value : listElement.name});
+            count ++;
+         }
+      });
 
-         let commandPromise = this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands().get();
-         commandPromise.then(list => {
-            //delete if needed
-            if(list.length > 0){
-               list.forEach(element => {
-                  let commandId = element.id;
-                  this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands(commandId).delete().then( () => {
-                     this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
-                        data: {
-                           name: "r",
-                           description: "Direct access to the top Public Lists",
-                           options: [
-                              {
-                                  name: "name",
-                                  description: "The name of the list",
-                                  type: 3,
-                                  required: true,
-                                  choices: choicesArray
-                              }
-                           ]
-                        }
-                     });
-                  });
-               });
-            }else{
-               this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
-                  data: {
-                     name: "r",
-                     description: "Direct access to the top Public Lists",
-                     options: [
-                        {
-                            name: "name",
-                            description: "The name of the list",
-                            type: 3,
-                            required: true,
-                            choices: choicesArray
-                        }
-                     ]
+      return choicesArray;
+   }
+
+   async UpdateSingleGuildListRanking(guildId){
+      this.client.guilds.fetch(guildId, true, true).then(async (fetchedGuild) => {
+         let choicesArray = await this.buildChoicesForGuild(fetchedGuild)
+         this.client.api.applications(this.client.user.id).guilds(fetchedGuild.id).commands.post({
+            data: {
+               name: "r",
+               description: "Direct access to the top Public Lists",
+               options: [
+                  {
+                        name: "name",
+                        description: "The name of the list",
+                        type: 3,
+                        required: true,
+                        choices: choicesArray
                   }
-               });
+               ]
             }
          });
       });
@@ -217,12 +208,12 @@ module.exports = class Discord {
    UpdateSlashCommands(){
       let commandPromise = this.RemoveCommands();
 
+      //Delete all global commands if needed
       commandPromise.then(list => {
          list.forEach(async element => {
             let commandId = element.id;
             await this.client.api.applications(this.client.user.id).commands(commandId).delete();
          });
-         this.RegisterNewCommands();
       });
      
       this.GuildSpecificCommands();
