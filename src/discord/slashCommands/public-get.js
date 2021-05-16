@@ -19,7 +19,6 @@ module.exports = class slashcommandListGetPublic extends slashcommandListAdd {
          }
       });
 
-
       //Now finish the respons up
       
       let listsHelper = new listHelper(this.process.client, this.process.mainDB);

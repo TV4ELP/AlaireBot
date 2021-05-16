@@ -145,11 +145,11 @@ module.exports = class Discord {
          commandPromise.then(list => {
             list.forEach(async element => {
                let commandId = element.id;
-               await this.client.api.applications(this.client.user.id).commands(commandId).delete();
+               await this.client.api.applications(this.client.user.id).guilds(guild.id).commands(commandId).delete();
             });
          });
 
-         //this.RegisterNewCommands(guild.id);
+         this.RegisterNewCommands(guild.id);
 
          this.UpdateSingleGuildListRanking(guild.id);
       });
